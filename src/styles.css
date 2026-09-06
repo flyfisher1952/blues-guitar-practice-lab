@@ -1,0 +1,16 @@
+:root {
+  --ink: #17130f;
+  --paper: #f3ecdf;
+  --cream: #e5d9c7;
+  --amber: #df8e2f;
+  --red: #9d2d24;
+  --muted: #766d62;
+  --line: rgba(23, 19, 15, .17);
+}
+
+* { box-sizing: border-box; }
+html { min-width: 320px; background: var(--paper); }
+body { margin: 0; color: var(--ink); background: var(--paper); font-family: "DM Sans", sans-serif; }
+button, select, input { font: inherit; }
+button, select { min-height: 44px; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
