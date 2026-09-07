@@ -1,0 +1,29 @@
+<section class="panel session-panel" role="tabpanel">
+  <div class="panel-heading">
+    <div>
+      <p class="eyebrow">THE CORE ROUTINE</p>
+      <h1>Your 20-minute session</h1>
+    </div>
+    <button class="text-button" type="button" (click)="progressReset.emit()">Reset checks</button>
+  </div>
+
+  <div class="session-grid">
+    @for (block of blocks; track $index) {
+      <button class="session-card" type="button" [class.done]="completed[$index]" (click)="blockToggled.emit($index)">
+        <span class="number">0{{ $index + 1 }}</span>
+        <span class="check">{{ completed[$index] ? '✓' : '' }}</span>
+        <strong>{{ block.title }}</strong>
+        <span>{{ block.description }}</span>
+      </button>
+    }
+  </div>
+
+  <div class="timer-panel">
+    <div><span class="eyebrow">FOCUS TIMER</span><strong>{{ timerText }}</strong></div>
+    <div class="timer-controls">
+      <button type="button" (click)="timerToggled.emit()">{{ timerRunning ? 'Pause' : seconds < 300 ? 'Resume' : 'Start' }}</button>
+      <button type="button" (click)="timerReset.emit()">Reset</button>
+    </div>
+    <p>{{ completedCount }} of 4 blocks complete</p>
+  </div>
+</section>

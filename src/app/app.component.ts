@@ -1,14 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, ViewEncapsulation } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ChordService } from './chord.service';
-import { DrumService } from './drum.service';
-import { ChordMode, Groove, GrooveStyle, KeyOption, PracticeBlock, PracticeTab } from './models';
+import { BuildLoopComponent } from './component/build-loop/build-loop.component';
+import { TriadShapesComponent } from './component/triad-shapes/triad-shapes.component';
+import { SessionComponent } from './component/session/session.component';
+import { ChordService } from './service/chord.service';
+import { DrumService } from './service/drum.service';
+import { ChordMode, Groove, GrooveStyle, KeyOption, PracticeBlock, PracticeTab } from './model/models';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SessionComponent, TriadShapesComponent, BuildLoopComponent],
+  encapsulation: ViewEncapsulation.None,
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -18,7 +22,7 @@ export class AppComponent {
 
   readonly tabs: readonly { id: PracticeTab; label: string }[] = [
     { id: 'session', label: 'Session' },
-    { id: 'triads', label: 'Chord Shapes' },
+    { id: 'triads', label: 'Triad Shapes' },
     { id: 'grooves', label: 'Build the Loop' }
   ];
 
@@ -79,7 +83,7 @@ export class AppComponent {
   private timer?: number;
 
   readonly key = computed(() => this.keys.find(key => key.label === this.selectedKey()) ?? this.keys[7]);
-  readonly shapes = computed(() => this.chords.createIivV(this.key(), this.chordMode()));
+  readonly triadShapes = computed(() => this.chords.createIivV(this.key(), this.chordMode()));
   readonly groove = computed(() => this.grooves[this.grooveStyle()]);
   readonly completedCount = computed(() => this.completed().filter(Boolean).length);
   readonly timerText = computed(() => {
@@ -144,32 +148,10 @@ export class AppComponent {
     this.seconds.set(300);
   }
 
-  chordFor(roman: string): string {
-    const [one, four, five] = this.key().chordNames;
-    const map: Record<string, string> = {
-      I: `${one}7`,
-      IV: `${four}7`,
-      V: `${five}7`,
-      II: this.noteAt(this.key().pitchClass + 2) + '7',
-      VI: this.noteAt(this.key().pitchClass + 9) + '7'
-    };
-    return map[roman] ?? roman;
-  }
-
-  trackIndex(index: number): number {
-    return index;
-  }
-
   private pauseTimer(): void {
     this.timerRunning.set(false);
     if (this.timer !== undefined) window.clearInterval(this.timer);
     this.timer = undefined;
-  }
-
-  private noteAt(pitch: number): string {
-    const sharp = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
-    const flat = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B'];
-    return (this.key().preferFlats ? flat : sharp)[pitch % 12];
   }
 
   private savedKey(): string {

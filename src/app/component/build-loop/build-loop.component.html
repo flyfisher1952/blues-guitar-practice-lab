@@ -1,0 +1,36 @@
+<section class="panel groove-panel" role="tabpanel">
+  <div class="panel-heading">
+    <div><p class="eyebrow">BUILD THE LOOP</p><h1>Twelve bars in {{ selectedKey.label }}</h1></div>
+    <label class="tempo"><span>Tempo</span><input type="range" min="55" max="110" [value]="tempo" (input)="tempoChange.emit(+$any($event.target).value)"><strong>{{ tempo }} BPM</strong></label>
+  </div>
+
+  <div class="groove-tabs" role="tablist" aria-label="Groove style">
+    <button type="button" [class.active]="grooveStyle === 'shuffle'" (click)="grooveStyleChange.emit('shuffle')">Texas shuffle</button>
+    <button type="button" [class.active]="grooveStyle === 'slow'" (click)="grooveStyleChange.emit('slow')">Slow blues</button>
+    <button type="button" [class.active]="grooveStyle === 'rock'" (click)="grooveStyleChange.emit('rock')">Blues rock</button>
+  </div>
+
+  <div class="beat-player">
+    <div><p class="eyebrow">BASIC DRUM BEAT</p><strong>{{ drums.playing() ? 'Playing' : drums.step() ? 'Paused' : 'Ready' }} · bar {{ drums.currentBar() + 1 }} of 12</strong><span>{{ groove.description }}</span></div>
+    <div class="transport" role="group" aria-label="Drum controls">
+      <button type="button" (click)="drums.rewind()">↤<span>Rewind</span></button>
+      <button type="button" [class.active]="drums.playing()" (click)="drums.play()">▶<span>Play</span></button>
+      <button type="button" (click)="drums.pause()">Ⅱ<span>Pause</span></button>
+      <button type="button" (click)="drums.stop()">■<span>Stop</span></button>
+    </div>
+  </div>
+
+  <div class="progression">
+    @for (bar of groove.bars; track $index; let index = $index) {
+      <div class="bar" [class.accent]="index === 0 || index === 8" [class.playing]="drums.playing() && drums.currentBar() === index">
+        <span>BAR {{ index + 1 }}</span><strong>{{ chordFor(bar) }}</strong>
+      </div>
+    }
+  </div>
+
+  <div class="groove-detail">
+    <div><p class="eyebrow">RIGHT HAND</p><strong>{{ groove.hand }}</strong></div>
+    <div><p class="eyebrow">TARGET</p><strong>{{ groove.target }}</strong></div>
+    <div><p class="eyebrow">TRY THIS</p><strong>{{ groove.suggestion }}</strong></div>
+  </div>
+</section>

@@ -1,0 +1,36 @@
+<section class="panel dark-panel" role="tabpanel">
+  <div class="panel-heading">
+    <div><p class="eyebrow amber">SMALL SHAPES, BIG SOUND</p><h1>{{ selectedKey }} triad shapes</h1></div>
+    <p class="orientation">Player’s view: high E on top, then B, then G</p>
+  </div>
+
+  <div class="mode-picker" role="group" aria-label="Chord type">
+    <span>CHORD TYPE</span>
+    <button type="button" [class.active]="chordMode === 'major'" (click)="chordModeChange.emit('major')">Major</button>
+    <button type="button" [class.active]="chordMode === 'minor'" (click)="chordModeChange.emit('minor')">Minor</button>
+    <button type="button" [class.active]="chordMode === 'seventh'" (click)="chordModeChange.emit('seventh')">7th</button>
+  </div>
+
+  <div class="triad-grid">
+    @for (shape of triadShapes; track shape.name) {
+      <article class="triad-card">
+        <header><div><h2>{{ shape.name }}</h2><small>{{ shape.subtitle }}</small></div><span>0{{ $index + 1 }}</span></header>
+        <div class="fretboard" [style.grid-template-columns]="'86px repeat(' + shape.fretWindow.length + ', 1fr)'">
+          <span class="corner-label">STRING</span>
+          @for (fret of shape.fretWindow; track fret) { <span class="fret-label">{{ fret }}</span> }
+          @for (string of [{label:'1 · high E', source:2}, {label:'2 · B', source:1}, {label:'3 · G', source:0}]; track string.source) {
+            <span class="string-label">{{ string.label }}</span>
+            @for (fret of shape.fretWindow; track fret) {
+              <span class="fret-cell" [class.has-note]="fret === shape.frets[string.source]">
+                @if (fret === shape.frets[string.source]) { <b>{{ shape.notes[string.source] }}</b> }
+              </span>
+            }
+          }
+        </div>
+        <div class="fret-direction"><span>LOWER FRETS</span><span>→ toward guitar body</span></div>
+      </article>
+    }
+  </div>
+
+  <div class="diagram-key"><strong>How to read these:</strong> The left column names the string. The number above each column is the actual fret. Every gold dot shows the note to play. The 7th shapes use three notes and omit the fifth.</div>
+</section>
