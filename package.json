@@ -5,7 +5,9 @@
   "scripts": {
     "start": "ng serve",
     "build": "ng build",
-    "test": "ng test"
+    "test": "ng test",
+    "deploy": "bash scripts/deploy-iis.sh",
+    "build:deploy": "npm run build && npm run deploy"
   },
   "dependencies": {
     "@angular/animations": "^20.3.0",
