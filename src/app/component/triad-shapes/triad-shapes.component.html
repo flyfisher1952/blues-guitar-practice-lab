@@ -1,36 +1,104 @@
-<section class="panel dark-panel" role="tabpanel">
-  <div class="panel-heading">
-    <div><p class="eyebrow amber">SMALL SHAPES, BIG SOUND</p><h1>{{ selectedKey }} triad shapes</h1></div>
-    <p class="orientation">Player’s view: high E on top, then B, then G</p>
-  </div>
+<section class="panel dark-panel triad-panel" role="tabpanel">
+  <div class="triad-workspace">
+    <div class="triad-library">
+      <div class="panel-heading triad-heading">
+        <div><p class="eyebrow amber">I–IV–V TRIAD LIBRARY</p><h1>{{ selectedKey }} triad shapes</h1></div>
+        <p class="orientation">Player’s view: nut at the top, guitar body below. Strings run vertically from low E (6) to high E (1).</p>
+      </div>
 
-  <div class="mode-picker" role="group" aria-label="Chord type">
-    <span>CHORD TYPE</span>
-    <button type="button" [class.active]="chordMode === 'major'" (click)="chordModeChange.emit('major')">Major</button>
-    <button type="button" [class.active]="chordMode === 'minor'" (click)="chordModeChange.emit('minor')">Minor</button>
-    <button type="button" [class.active]="chordMode === 'seventh'" (click)="chordModeChange.emit('seventh')">7th</button>
-  </div>
+      <div class="mode-picker" role="group" aria-label="Chord type">
+        <span>CHORD TYPE</span>
+        <button type="button" [class.active]="chordMode === 'major'" (click)="chordModeChange.emit('major')">Major</button>
+        <button type="button" [class.active]="chordMode === 'minor'" (click)="chordModeChange.emit('minor')">Minor</button>
+        <button type="button" [class.active]="chordMode === 'seventh'" (click)="chordModeChange.emit('seventh')">7th</button>
+      </div>
 
-  <div class="triad-grid">
-    @for (shape of triadShapes; track shape.name) {
-      <article class="triad-card">
-        <header><div><h2>{{ shape.name }}</h2><small>{{ shape.subtitle }}</small></div><span>0{{ $index + 1 }}</span></header>
-        <div class="fretboard" [style.grid-template-columns]="'86px repeat(' + shape.fretWindow.length + ', 1fr)'">
-          <span class="corner-label">STRING</span>
-          @for (fret of shape.fretWindow; track fret) { <span class="fret-label">{{ fret }}</span> }
-          @for (string of [{label:'1 · high E', source:2}, {label:'2 · B', source:1}, {label:'3 · G', source:0}]; track string.source) {
-            <span class="string-label">{{ string.label }}</span>
-            @for (fret of shape.fretWindow; track fret) {
-              <span class="fret-cell" [class.has-note]="fret === shape.frets[string.source]">
-                @if (fret === shape.frets[string.source]) { <b>{{ shape.notes[string.source] }}</b> }
-              </span>
-            }
+      @for (group of triadShapes; track group.degree) {
+        <section class="chord-group">
+          <header class="chord-group-heading">
+            <span>{{ group.degree }}</span>
+            <div><h2>{{ group.name }}</h2><small>Drag any diagram into your notes</small></div>
+          </header>
+
+          @for (set of group.sets; track set.label) {
+            <div class="string-set">
+              <h3>{{ set.label }}</h3>
+              <div class="shape-row">
+                @for (shape of set.shapes; track shape.id) {
+                  <article class="mini-triad-card">
+                    <h4>{{ shape.subtitle }}</h4>
+                    <svg
+                      class="triad-diagram"
+                      draggable="true"
+                      role="img"
+                      tabindex="0"
+                      [attr.aria-label]="shape.name + ', ' + shape.stringSet + ', ' + shape.subtitle"
+                      [attr.viewBox]="diagramViewBox(shape)"
+                      [attr.height]="diagramHeight(shape)"
+                      (dragstart)="beginTriadDrag($event, shape)">
+                      <rect width="246" [attr.height]="diagramHeight(shape)" rx="8" class="diagram-background"/>
+                      @for (number of stringNumbers; track number; let stringIndex = $index) {
+                        <text [attr.x]="stringX(stringIndex)" y="22" text-anchor="middle" class="svg-string-number">{{ number }}</text>
+                        <line [attr.x1]="stringX(stringIndex)" y1="32" [attr.x2]="stringX(stringIndex)" [attr.y2]="diagramHeight(shape) - 16" class="svg-string" [class.low-string]="stringIndex === 0"/>
+                      }
+                      @for (fret of shape.usedFrets; track fret; let fretIndex = $index) {
+                        <text x="18" [attr.y]="fretY(fretIndex) + 5" text-anchor="middle" class="svg-fret-number">{{ fret }}</text>
+                        <line x1="34" [attr.y1]="fretY(fretIndex)" x2="218" [attr.y2]="fretY(fretIndex)" class="svg-fret"/>
+                        @for (number of stringNumbers; track number; let stringIndex = $index) {
+                          @if (shape.frets[stringIndex] === fret) {
+                            <circle [attr.cx]="stringX(stringIndex)" [attr.cy]="fretY(fretIndex)" r="13" class="svg-note" [class.root-note]="shape.roots[stringIndex]"/>
+                            <text [attr.x]="stringX(stringIndex)" [attr.y]="fretY(fretIndex) + 4" text-anchor="middle" class="svg-note-name" [class.root-note-name]="shape.roots[stringIndex]">{{ shape.notes[stringIndex] }}</text>
+                          }
+                        }
+                      }
+                    </svg>
+                  </article>
+                }
+              </div>
+            </div>
           }
-        </div>
-        <div class="fret-direction"><span>LOWER FRETS</span><span>→ toward guitar body</span></div>
-      </article>
-    }
-  </div>
+        </section>
+      }
 
-  <div class="diagram-key"><strong>How to read these:</strong> The left column names the string. The number above each column is the actual fret. Every gold dot shows the note to play. The 7th shapes use three notes and omit the fifth.</div>
+      <div class="diagram-key"><strong>Reading the diagrams:</strong> Fret numbers are shown on the left, and only frets containing notes appear. Hollow gold circles are roots. The diagrams cover strings 6 through 1 in root position, first inversion, and second inversion.</div>
+    </div>
+
+    <aside class="notes-workspace" aria-label="Practice notes editor">
+      <div class="editor-heading">
+        <div><p class="eyebrow">PRACTICE PAGE</p><h2>Arrange your shapes</h2></div>
+        <button type="button" class="clear-editor" (click)="clearEditor()">Clear</button>
+      </div>
+      <p class="editor-help">Type notes here, drop in your own images, or drag a triad diagram from the left.</p>
+      <div class="editor-toolbar" role="toolbar" aria-label="Text formatting">
+        <button type="button" title="Bold" aria-label="Bold" (click)="format('bold')"><b>B</b></button>
+        <button type="button" title="Italic" aria-label="Italic" (click)="format('italic')"><i>I</i></button>
+        <button type="button" title="Underline" aria-label="Underline" (click)="format('underline')"><u>U</u></button>
+        <button type="button" title="Bulleted list" aria-label="Bulleted list" (click)="format('insertUnorderedList')">• List</button>
+        <button type="button" title="Numbered list" aria-label="Numbered list" (click)="format('insertOrderedList')">1. List</button>
+        <select aria-label="Text style" (change)="format('formatBlock', $any($event.target).value)">
+          <option value="p">Paragraph</option>
+          <option value="h2">Heading</option>
+          <option value="h3">Subheading</option>
+        </select>
+      </div>
+      <div class="image-size-control" [class.enabled]="selectedImage">
+        <label for="image-size">Selected image size</label>
+        <input id="image-size" type="range" min="120" max="680" [value]="selectedImageWidth" [disabled]="!selectedImage" (input)="resizeSelected($event)">
+        <span>{{ selectedImage ? selectedImageWidth + ' px' : 'Select an image' }}</span>
+      </div>
+      <div
+        #editor
+        class="rich-editor"
+        contenteditable="true"
+        role="textbox"
+        aria-multiline="true"
+        aria-label="Practice notes"
+        (dragover)="allowDrop($event)"
+        (drop)="dropIntoEditor($event)"
+        (click)="selectEditorImage($event)">
+        <h2>{{ selectedKey }} practice notes</h2>
+        <p>Drag triad diagrams here to build a practice sheet.</p>
+      </div>
+    </aside>
+  </div>
 </section>

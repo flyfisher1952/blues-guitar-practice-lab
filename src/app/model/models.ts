@@ -10,11 +10,25 @@ export interface KeyOption {
 }
 
 export interface TriadShape {
+  id: string;
   name: string;
   subtitle: string;
-  notes: readonly [string, string, string];
-  frets: readonly [number, number, number];
-  fretWindow: readonly number[];
+  stringSet: string;
+  notes: readonly (string | null)[];
+  frets: readonly (number | null)[];
+  roots: readonly boolean[];
+  usedFrets: readonly number[];
+}
+
+export interface TriadStringSet {
+  label: string;
+  shapes: readonly TriadShape[];
+}
+
+export interface TriadGroup {
+  degree: 'I' | 'IV' | 'V';
+  name: string;
+  sets: readonly TriadStringSet[];
 }
 
 export interface PracticeBlock {
