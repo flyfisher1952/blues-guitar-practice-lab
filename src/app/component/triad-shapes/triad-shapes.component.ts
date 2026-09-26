@@ -430,7 +430,7 @@ export class TriadShapesComponent implements AfterViewInit {
 <title>${this.escapeHtml(this.selectedKey)} practice notes</title>
 <style>
 @page { margin: 0.6in; }
-body { margin: 0; color: #17130f; font-family: Arial, sans-serif; line-height: 1.45; }
+body { margin: 0; color: #17130f; font-family: "${this.defaultFontFamily}", Arial, sans-serif; font-size: ${this.defaultFontSize}px; line-height: 1.45; }
 .print-controls { padding: 12px 20px; position: sticky; top: 0; display: flex; gap: 8px; background: #17130f; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
 .print-controls button { min-height: 40px; padding: 0 18px; border: 1px solid #f3ecdf; color: #17130f; background: #f3ecdf; font: 700 14px Arial, sans-serif; cursor: pointer; }
 .print-controls button:first-child { color: white; border-color: #9d2d24; background: #9d2d24; }
@@ -482,7 +482,7 @@ ${fontLinks}
 <style>
 * { box-sizing: border-box; }
 html { background: #f3ecdf; }
-body { margin: 0; padding: 32px; color: #17130f; background: #f3ecdf; font-family: "DM Sans", Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 1.1; }
+body { margin: 0; padding: 32px; color: #17130f; background: #f3ecdf; font-family: "${this.defaultFontFamily}", Arial, sans-serif; font-size: ${this.defaultFontSize}px; font-weight: 400; line-height: 1.1; }
 #practice-notes { max-width: 900px; min-height: 600px; margin: 0 auto; padding: 24px; background: #fffdf8; border: 1px solid #8c8073; }
 #practice-notes p { margin: 0; }
 #practice-notes h1, #practice-notes h2, #practice-notes h3 { font-family: "Newsreader", Georgia, serif; }
@@ -687,6 +687,7 @@ body { margin: 0; padding: 32px; color: #17130f; background: #f3ecdf; font-famil
     const selection = window.getSelection();
     if (!selection?.rangeCount || !this.editor?.nativeElement.contains(selection.anchorNode)) {
       this.editor?.nativeElement.insertAdjacentHTML('beforeend', html);
+      this.saveLastDocument();
       return;
     }
     const range = selection.getRangeAt(0);
@@ -694,6 +695,7 @@ body { margin: 0; padding: 32px; color: #17130f; background: #f3ecdf; font-famil
     range.insertNode(range.createContextualFragment(html));
     selection.collapseToEnd();
     this.rememberSelection();
+    this.saveLastDocument();
   }
 
   private placeCaret(x: number, y: number): void {
