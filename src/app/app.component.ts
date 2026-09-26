@@ -83,8 +83,9 @@ export class AppComponent {
     readonly timerRunning = signal(false);
     private timer?: number;
 
-    readonly key = computed(() => this.keys.find((key) => key.label === this.selectedKey()) ?? this.keys[7]);
-    readonly triadShapes = computed(() => this.chords.createIivV(this.key(), this.chordMode()));
+    readonly triadKey = computed(() => this.keys.find((key) => key.label === this.triadSelectedKey()) ?? this.keys[7]);
+    readonly loopKey = computed(() => this.keys.find((key) => key.label === this.loopSelectedKey()) ?? this.keys[7]);
+    readonly triadShapes = computed(() => this.chords.createIivV(this.triadKey(), this.chordMode()));
     readonly groove = computed(() => this.grooves[this.grooveStyle()]);
     readonly completedCount = computed(() => this.completed().filter(Boolean).length);
     readonly timerText = computed(() => {
@@ -96,9 +97,14 @@ export class AppComponent {
         this.activeTab.set(tab);
     }
 
-    changeKey(label: string): void {
-        this.selectedKey.set(label);
-        localStorage.setItem("labKey", label);
+    changeTriadKey(label: string): void {
+        this.triadSelectedKey.set(label);
+        localStorage.setItem("labTriadKey", label);
+    }
+
+    changeLoopKey(label: string): void {
+        this.loopSelectedKey.set(label);
+        localStorage.setItem("labLoopKey", label);
     }
 
     setChordMode(mode: ChordMode): void {
@@ -155,8 +161,8 @@ export class AppComponent {
         this.timer = undefined;
     }
 
-    private savedKey(): string {
-        const saved = localStorage.getItem("labKey") ?? "G";
+    private savedKey(storageKey: string): string {
+        const saved = localStorage.getItem(storageKey) ?? localStorage.getItem("labKey") ?? "G";
         return this.keys.some((key) => key.label === saved) ? saved : "G";
     }
 
