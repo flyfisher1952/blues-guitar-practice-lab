@@ -236,7 +236,7 @@ h1, h2, h3 { font-family: Georgia, serif; }
 
   private insertImage(source: string, alt: string, width: number): void {
     const safeAlt = alt.replace(/[&<>"']/g, '');
-    const imageId = `editor-image-${++this.imageSequence}`;
+    const imageId = `editor-image-${Date.now()}-${++this.imageSequence}`;
     this.insertHtml(`<span class="resizable-image" data-editor-image-id="${imageId}" contenteditable="false" style="width:${width}px"><img src="${source}" alt="${safeAlt}"></span>&#8203;`);
     const inserted = this.editor?.nativeElement.querySelector(`[data-editor-image-id="${imageId}"]`) as HTMLElement | null;
     if (inserted) {
