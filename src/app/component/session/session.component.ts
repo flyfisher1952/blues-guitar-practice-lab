@@ -1,6 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { PracticeBlock } from '../../model/models';
+
+interface PracticeSegment {
+  id: string;
+  name: string;
+  description: string;
+  enabled: boolean;
+  plannedMinutes: number;
+  elapsedSeconds: number;
+}
+
+interface PracticeDay {
+  date: string;
+  segments: Record<string, number>;
+}
 
 @Component({
   selector: 'app-session',
@@ -8,16 +22,229 @@ import { PracticeBlock } from '../../model/models';
   imports: [CommonModule],
   templateUrl: './session.component.html'
 })
-export class SessionComponent {
+export class SessionComponent implements OnInit, OnDestroy {
   @Input({ required: true }) blocks: readonly PracticeBlock[] = [];
-  @Input({ required: true }) completed: readonly boolean[] = [];
-  @Input({ required: true }) timerText = '';
-  @Input() timerRunning = false;
-  @Input() seconds = 300;
-  @Input() completedCount = 0;
 
-  @Output() blockToggled = new EventEmitter<number>();
-  @Output() progressReset = new EventEmitter<void>();
-  @Output() timerToggled = new EventEmitter<void>();
-  @Output() timerReset = new EventEmitter<void>();
+  totalMinutes = 20;
+  segments: PracticeSegment[] = [];
+  history: PracticeDay[] = [];
+  monitorOpen = false;
+  activeSegmentId?: string;
+  timerRunning = false;
+  private timer?: number;
+  private readonly planKey = 'practiceSessionPlan';
+  private readonly historyKey = 'practiceSessionHistory';
+
+  ngOnInit(): void {
+    this.restorePlan();
+    this.restoreHistory();
+  }
+
+  ngOnDestroy(): void {
+    this.stopClock();
+  }
+
+  get enabledSegments(): PracticeSegment[] {
+    return this.segments.filter(segment => segment.enabled);
+  }
+
+  get plannedMinutes(): number {
+    return this.enabledSegments.reduce((sum, segment) => sum + segment.plannedMinutes, 0);
+  }
+
+  get remainingMinutes(): number {
+    return this.totalMinutes - this.plannedMinutes;
+  }
+
+  get sessionElapsedSeconds(): number {
+    return this.segments.reduce((sum, segment) => sum + segment.elapsedSeconds, 0);
+  }
+
+  get allTimeSeconds(): number {
+    return this.history.reduce(
+      (total, day) => total + Object.values(day.segments).reduce((sum, seconds) => sum + seconds, 0),
+      0
+    );
+  }
+
+  get activityTotals(): Array<{ name: string; seconds: number }> {
+    const totals = new Map<string, number>();
+    for (const day of this.history) {
+      for (const [name, seconds] of Object.entries(day.segments)) {
+        totals.set(name, (totals.get(name) ?? 0) + seconds);
+      }
+    }
+    return Array.from(totals, ([name, seconds]) => ({ name, seconds }))
+      .sort((left, right) => right.seconds - left.seconds);
+  }
+
+  get recentHistory(): PracticeDay[] {
+    return [...this.history].sort((left, right) => right.date.localeCompare(left.date)).slice(0, 7);
+  }
+
+  setTotalMinutes(value: number): void {
+    this.totalMinutes = this.clamp(value, 1, 480, 20);
+    this.persistPlan();
+  }
+
+  updateSegmentName(segment: PracticeSegment, value: string): void {
+    segment.name = value.trim() || 'Practice segment';
+    this.persistPlan();
+  }
+
+  updateSegmentMinutes(segment: PracticeSegment, value: number): void {
+    segment.plannedMinutes = this.clamp(value, 1, 240, 5);
+    this.persistPlan();
+  }
+
+  toggleSegment(segment: PracticeSegment, enabled: boolean): void {
+    segment.enabled = enabled;
+    if (!enabled && this.activeSegmentId === segment.id) this.stopSegment(segment);
+    this.persistPlan();
+  }
+
+  addSegment(): void {
+    this.segments.push({
+      id: crypto.randomUUID?.() ?? `segment-${Date.now()}`,
+      name: 'New segment',
+      description: '',
+      enabled: true,
+      plannedMinutes: 5,
+      elapsedSeconds: 0
+    });
+    this.persistPlan();
+  }
+
+  removeSegment(segment: PracticeSegment): void {
+    if (this.activeSegmentId === segment.id) this.stopSegment(segment);
+    this.segments = this.segments.filter(item => item.id !== segment.id);
+    this.persistPlan();
+  }
+
+  openMonitor(): void {
+    this.monitorOpen = true;
+  }
+
+  closeMonitor(): void {
+    this.monitorOpen = false;
+  }
+
+  startSegment(segment: PracticeSegment): void {
+    if (!segment.enabled) return;
+    if (this.activeSegmentId === segment.id && this.timerRunning) {
+      this.stopSegment(segment);
+      return;
+    }
+    this.stopClock();
+    this.activeSegmentId = segment.id;
+    this.timerRunning = true;
+    this.timer = window.setInterval(() => {
+      segment.elapsedSeconds += 1;
+      this.recordSecond(segment.name);
+    }, 1000);
+  }
+
+  stopSegment(_segment?: PracticeSegment): void {
+    this.stopClock();
+  }
+
+  resetSegment(segment: PracticeSegment): void {
+    if (this.activeSegmentId === segment.id) this.stopClock();
+    segment.elapsedSeconds = 0;
+  }
+
+  resetSession(): void {
+    this.stopClock();
+    this.segments.forEach(segment => segment.elapsedSeconds = 0);
+  }
+
+  clearHistory(): void {
+    if (!window.confirm('Clear all recorded practice history? This cannot be undone.')) return;
+    this.history = [];
+    localStorage.removeItem(this.historyKey);
+  }
+
+  formatTime(seconds: number): string {
+    const safe = Math.max(0, Math.floor(seconds));
+    const hours = Math.floor(safe / 3600);
+    const minutes = Math.floor((safe % 3600) / 60);
+    const remaining = safe % 60;
+    return hours > 0
+      ? `${hours}:${String(minutes).padStart(2, '0')}:${String(remaining).padStart(2, '0')}`
+      : `${String(minutes).padStart(2, '0')}:${String(remaining).padStart(2, '0')}`;
+  }
+
+  formatDuration(seconds: number): string {
+    if (seconds < 60) return `${seconds} sec`;
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.round((seconds % 3600) / 60);
+    return hours ? `${hours} hr ${minutes} min` : `${minutes} min`;
+  }
+
+  private stopClock(): void {
+    this.timerRunning = false;
+    if (this.timer !== undefined) window.clearInterval(this.timer);
+    this.timer = undefined;
+    this.activeSegmentId = undefined;
+  }
+
+  private recordSecond(segmentName: string): void {
+    const date = new Date().toISOString().slice(0, 10);
+    let day = this.history.find(entry => entry.date === date);
+    if (!day) {
+      day = { date, segments: {} };
+      this.history = [...this.history, day];
+    }
+    day.segments[segmentName] = (day.segments[segmentName] ?? 0) + 1;
+    localStorage.setItem(this.historyKey, JSON.stringify(this.history));
+  }
+
+  private restorePlan(): void {
+    try {
+      const saved = JSON.parse(localStorage.getItem(this.planKey) ?? 'null') as {
+        totalMinutes?: number;
+        segments?: PracticeSegment[];
+      } | null;
+      if (saved?.segments?.length) {
+        this.totalMinutes = this.clamp(saved.totalMinutes ?? 20, 1, 480, 20);
+        this.segments = saved.segments.map(segment => ({
+          ...segment,
+          elapsedSeconds: 0,
+          plannedMinutes: this.clamp(segment.plannedMinutes, 1, 240, 5)
+        }));
+        return;
+      }
+    } catch {
+      localStorage.removeItem(this.planKey);
+    }
+
+    this.segments = this.blocks.map((block, index) => ({
+      id: `default-${index}`,
+      name: block.title,
+      description: block.description,
+      enabled: true,
+      plannedMinutes: 5,
+      elapsedSeconds: 0
+    }));
+  }
+
+  private restoreHistory(): void {
+    try {
+      const saved = JSON.parse(localStorage.getItem(this.historyKey) ?? '[]');
+      this.history = Array.isArray(saved) ? saved : [];
+    } catch {
+      this.history = [];
+      localStorage.removeItem(this.historyKey);
+    }
+  }
+
+  private persistPlan(): void {
+    const segments = this.segments.map(segment => ({ ...segment, elapsedSeconds: 0 }));
+    localStorage.setItem(this.planKey, JSON.stringify({ totalMinutes: this.totalMinutes, segments }));
+  }
+
+  private clamp(value: number, minimum: number, maximum: number, fallback: number): number {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? Math.round(Math.max(minimum, Math.min(maximum, numeric))) : fallback;
+  }
 }
