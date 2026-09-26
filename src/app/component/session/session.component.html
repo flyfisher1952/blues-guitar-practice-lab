@@ -1,29 +1,130 @@
 <section class="panel session-panel" role="tabpanel">
-  <div class="panel-heading">
+  <div class="panel-heading session-heading">
     <div>
-      <p class="eyebrow">THE CORE ROUTINE</p>
-      <h1>Your 20-minute session</h1>
+      <p class="eyebrow">PRACTICE SESSION</p>
+      <h1>Build your practice plan</h1>
     </div>
-    <button class="text-button" type="button" (click)="progressReset.emit()">Reset checks</button>
+    <button class="session-monitor-button" type="button" (click)="openMonitor()">Pop out session monitor</button>
   </div>
 
-  <div class="session-grid">
-    @for (block of blocks; track $index) {
-      <button class="session-card" type="button" [class.done]="completed[$index]" (click)="blockToggled.emit($index)">
-        <span class="number">0{{ $index + 1 }}</span>
-        <span class="check">{{ completed[$index] ? '✓' : '' }}</span>
-        <strong>{{ block.title }}</strong>
-        <span>{{ block.description }}</span>
-      </button>
-    }
+  <div class="session-summary-bar">
+    <label>
+      <span>Total duration</span>
+      <span class="session-number-input">
+        <input type="number" min="1" max="480" [value]="totalMinutes" (change)="setTotalMinutes($any($event.target).valueAsNumber)">
+        <small>minutes</small>
+      </span>
+    </label>
+    <div><span>Planned</span><strong>{{ plannedMinutes }} min</strong></div>
+    <div><span>Session elapsed</span><strong>{{ formatTime(sessionElapsedSeconds) }}</strong></div>
+    <div class="plan-balance" [class.warning]="remainingMinutes !== 0">
+      <span>{{ remainingMinutes >= 0 ? 'Unassigned' : 'Over plan' }}</span>
+      <strong>{{ remainingMinutes < 0 ? -remainingMinutes : remainingMinutes }} min</strong>
+    </div>
   </div>
 
-  <div class="timer-panel">
-    <div><span class="eyebrow">FOCUS TIMER</span><strong>{{ timerText }}</strong></div>
-    <div class="timer-controls">
-      <button type="button" (click)="timerToggled.emit()">{{ timerRunning ? 'Pause' : seconds < 300 ? 'Resume' : 'Start' }}</button>
-      <button type="button" (click)="timerReset.emit()">Reset</button>
-    </div>
-    <p>{{ completedCount }} of 4 blocks complete</p>
+  <div class="session-layout">
+    <section class="session-plan-card" aria-labelledby="segments-heading">
+      <header>
+        <div>
+          <p class="eyebrow">SESSION DIVISIONS</p>
+          <h2 id="segments-heading">Choose what to practice</h2>
+        </div>
+        <button type="button" (click)="addSegment()">Add division</button>
+      </header>
+
+      <div class="segment-editor-list">
+        @for (segment of segments; track segment.id; let index = $index) {
+          <div class="segment-editor" [class.disabled]="!segment.enabled">
+            <label class="segment-enabled">
+              <input type="checkbox" [checked]="segment.enabled" (change)="toggleSegment(segment, $any($event.target).checked)">
+              <span class="segment-number">{{ index + 1 }}</span>
+            </label>
+            <label class="segment-name">
+              <span class="visually-hidden">Division name</span>
+              <input type="text" [value]="segment.name" (change)="updateSegmentName(segment, $any($event.target).value)">
+              @if (segment.description) { <small>{{ segment.description }}</small> }
+            </label>
+            <label class="segment-duration">
+              <span class="visually-hidden">Duration in minutes</span>
+              <input type="number" min="1" max="240" [value]="segment.plannedMinutes" (change)="updateSegmentMinutes(segment, $any($event.target).valueAsNumber)">
+              <small>min</small>
+            </label>
+            <button class="segment-remove" type="button" aria-label="Remove division" (click)="removeSegment(segment)">×</button>
+          </div>
+        }
+      </div>
+    </section>
+
+    <aside class="practice-history" aria-labelledby="history-heading">
+      <header>
+        <div>
+          <p class="eyebrow">PRACTICE HISTORY</p>
+          <h2 id="history-heading">{{ formatDuration(allTimeSeconds) }} total</h2>
+        </div>
+        @if (history.length) {
+          <button type="button" class="text-button" (click)="clearHistory()">Clear history</button>
+        }
+      </header>
+
+      @if (!history.length) {
+        <p class="history-empty">Recorded practice time will appear here after you start a segment.</p>
+      } @else {
+        <div class="activity-totals">
+          @for (activity of activityTotals; track activity.name) {
+            <div><span>{{ activity.name }}</span><strong>{{ formatDuration(activity.seconds) }}</strong></div>
+          }
+        </div>
+        <h3>Recent days</h3>
+        <div class="recent-history">
+          @for (day of recentHistory; track day.date) {
+            <div>
+              <strong>{{ day.date }}</strong>
+              <span>{{ formatDuration($any(day.segments | keyvalue).reduce($any(sumSeconds), 0)) }}</span>
+            </div>
+          }
+        </div>
+      }
+    </aside>
   </div>
+
+  @if (monitorOpen) {
+    <aside class="session-monitor" role="dialog" aria-modal="false" aria-labelledby="session-monitor-title">
+      <header>
+        <div>
+          <p class="eyebrow">LIVE SESSION</p>
+          <h2 id="session-monitor-title">Session Monitor</h2>
+        </div>
+        <button type="button" aria-label="Close session monitor" (click)="closeMonitor()">×</button>
+      </header>
+
+      <div class="monitor-total">
+        <span>Total session time</span>
+        <strong>{{ formatTime(sessionElapsedSeconds) }}</strong>
+        <small>of {{ totalMinutes }} planned minutes</small>
+      </div>
+
+      <div class="monitor-segments">
+        @for (segment of enabledSegments; track segment.id) {
+          <section [class.active]="activeSegmentId === segment.id">
+            <div>
+              <strong>{{ segment.name }}</strong>
+              <small>{{ segment.plannedMinutes }} min planned</small>
+            </div>
+            <time>{{ formatTime(segment.elapsedSeconds) }}</time>
+            <div class="monitor-controls">
+              <button type="button" (click)="startSegment(segment)">
+                {{ activeSegmentId === segment.id && timerRunning ? 'Stop' : segment.elapsedSeconds ? 'Resume' : 'Start' }}
+              </button>
+              <button type="button" (click)="resetSegment(segment)">Reset</button>
+            </div>
+          </section>
+        }
+      </div>
+
+      <footer>
+        <button type="button" class="reset-session" (click)="resetSession()">Reset whole session</button>
+      </footer>
+    </aside>
+  }
 </section>
