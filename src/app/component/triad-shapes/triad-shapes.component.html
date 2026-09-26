@@ -136,7 +136,7 @@
 
       <div class="image-size-control" [class.enabled]="selectedImage">
         <label for="image-size">Selected image size</label>
-        <input id="image-size" type="range" min="120" max="680" [value]="selectedImageWidth" [disabled]="!selectedImage" (input)="resizeSelected($event)">
+        <input id="image-size" type="range" min="40" max="680" [value]="selectedImageWidth" [disabled]="!selectedImage" (input)="resizeSelected($event)">
         <span>{{ selectedImage ? selectedImageWidth + ' px' : 'Select an image' }}</span>
       </div>
 
