@@ -248,6 +248,29 @@ main { min-height: calc(100vh - 176px); }
 .rich-editor .resizable-image { width: 100px; min-width: 40px; max-width: 100%; margin: 2px; display: inline-block; overflow: hidden; resize: horizontal; vertical-align: top; border: 2px solid transparent; }
 .rich-editor .resizable-image:hover, .rich-editor .resizable-image:focus-within { border-color: var(--amber); }
 .rich-editor .resizable-image img { width: 100%; height: auto; display: block; object-fit: contain; }
+.rich-editor .page-break {
+  height: 0;
+  margin: 28px 0;
+  position: relative;
+  border-top: 2px dashed #9b8e80;
+  cursor: default;
+  user-select: none;
+}
+.rich-editor .page-break::after {
+  content: "Page break";
+  padding: 0 8px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  color: #6e645a;
+  background: #fffdf8;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  line-height: 1;
+  text-transform: uppercase;
+  transform: translate(-50%, -50%);
+}
 
 .groove-panel { background: #d8ccba; }
 .tempo { display: flex; align-items: center; gap: 12px; }
