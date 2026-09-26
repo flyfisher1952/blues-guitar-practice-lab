@@ -326,17 +326,21 @@ main { min-height: calc(100vh - 176px); }
   transform: translate(-50%, -50%);
 }
 
-.groove-panel { background: #d8ccba; }
+.groove-panel { padding: 20px clamp(14px, 2.5vw, 38px); background: #d8ccba; }
+.groove-panel .panel-heading { margin-bottom: 14px; }
+.groove-panel .panel-heading h1 { font-size: clamp(1.9rem, 3vw, 3rem); }
 .loop-controls { display: flex; align-items: center; justify-content: flex-end; gap: 24px; }
 .groove-key-select { display: flex; align-items: center; gap: 10px; }
 .groove-key-select > span { color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .12em; }
 .groove-key-select select { min-width: 126px; padding: 0 36px 0 12px; border: 1px solid var(--ink); color: var(--ink); background: var(--paper); font-weight: 700; cursor: pointer; }
 .tempo { display: flex; align-items: center; gap: 12px; }
 .tempo input { accent-color: var(--red); }
-.groove-tabs { display: flex; gap: 7px; margin-bottom: 16px; }
-.groove-tabs button { padding: 0 18px; border: 1px solid var(--line); background: transparent; font-size: .85rem; font-weight: 700; cursor: pointer; }
+.loop-mode-picker { margin-bottom: 10px; }
+.loop-mode-picker small { margin-left: auto; color: var(--muted); font-size: .75rem; }
+.groove-tabs { display: flex; gap: 7px; margin-bottom: 10px; }
+.groove-tabs button { min-height: 38px; padding: 0 18px; border: 1px solid var(--line); background: transparent; font-size: .85rem; font-weight: 700; cursor: pointer; }
 .groove-tabs button.active { color: white; border-color: var(--red); background: var(--red); }
-.beat-player { margin-bottom: 16px; padding: 18px 20px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 24px; border: 1px solid var(--ink); background: #cbbca6; }
+.beat-player { margin-bottom: 10px; padding: 12px 16px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 24px; border: 1px solid var(--ink); background: #cbbca6; }
 .beat-player strong, .beat-player span { display: block; }
 .beat-player > div > span { margin-top: 3px; color: #5f564c; font-size: .87rem; }
 .transport { display: flex; gap: 6px; }
@@ -344,14 +348,14 @@ main { min-height: calc(100vh - 176px); }
 .transport button span { margin-top: 2px; font-size: .63rem; }
 .transport button:hover, .transport button.active { color: white; background: var(--red); border-color: var(--red); }
 .progression { display: grid; grid-template-columns: repeat(12, 1fr); border: 1px solid var(--ink); background: var(--paper); }
-.bar { min-height: 92px; padding: 11px; display: flex; flex-direction: column; justify-content: space-between; border-right: 1px solid var(--line); }
+.bar { min-height: 76px; padding: 9px; display: flex; flex-direction: column; justify-content: space-between; border-right: 1px solid var(--line); }
 .bar:last-child { border-right: 0; }
 .bar span { color: var(--muted); font-size: .61rem; }
 .bar strong { font: 1.28rem "Newsreader", serif; }
 .bar.accent { background: var(--amber); }
 .bar.playing { outline: 4px solid var(--red); outline-offset: -4px; }
-.groove-detail { margin-top: 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; border: 1px solid var(--line); background: var(--line); }
-.groove-detail > div { padding: 22px; background: var(--paper); }
+.groove-detail { margin-top: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; border: 1px solid var(--line); background: var(--line); }
+.groove-detail > div { padding: 14px 16px; background: var(--paper); }
 .groove-detail strong { font: 1.25rem "Newsreader", serif; }
 
 footer { padding: 24px clamp(20px, 5vw, 72px); display: flex; justify-content: space-between; color: #a99d90; background: var(--ink); font-size: .7rem; letter-spacing: .1em; }
@@ -401,6 +405,7 @@ footer { padding: 24px clamp(20px, 5vw, 72px); display: flex; justify-content: s
   .bar:nth-child(3n) { border-right: 0; }
   .mode-picker { flex-wrap: wrap; }
   .mode-picker > span { flex-basis: 100%; }
+  .loop-mode-picker small { flex-basis: 100%; margin-left: 0; }
   .shape-grid { grid-template-columns: repeat(auto-fit, minmax(68px, 1fr)); }
   .triad-diagram { height: auto; }
   .notes-workspace { padding: 12px; }
