@@ -17,7 +17,7 @@ export class TriadShapesComponent {
   @Output() chordModeChange = new EventEmitter<ChordMode>();
 
   selectedImage?: HTMLElement;
-  selectedImageWidth = 320;
+  selectedImageWidth = 100;
   libraryWidth = 52;
   resizing = false;
   readonly stringNumbers = [6, 5, 4, 3, 2, 1];
@@ -54,13 +54,13 @@ export class TriadShapesComponent {
     this.placeCaret(event.clientX, event.clientY);
     const triadSource = event.dataTransfer?.getData('application/x-triad-image');
     if (triadSource) {
-      this.insertImage(triadSource, 'Dragged triad diagram');
+      this.insertImage(triadSource, 'Dragged triad diagram', 100);
       return;
     }
     const imageFile = Array.from(event.dataTransfer?.files ?? []).find(file => file.type.startsWith('image/'));
     if (!imageFile || imageFile.size > 8 * 1024 * 1024) return;
     const reader = new FileReader();
-    reader.onload = () => this.insertImage(String(reader.result), imageFile.name);
+    reader.onload = () => this.insertImage(String(reader.result), imageFile.name, 240);
     reader.readAsDataURL(imageFile);
   }
 
@@ -104,7 +104,7 @@ export class TriadShapesComponent {
     event.preventDefault();
     const text = event.clipboardData?.getData('text/plain') ?? '';
     const html = this.escapeHtml(text).replace(/\r\n?|\n/g, '<br>');
-    this.insertHtml(html);
+    this.insertHtml(`<span style="font-weight:400">${html}</span>`);
   }
 
   format(command: string, value?: string): void {
@@ -127,7 +127,7 @@ export class TriadShapesComponent {
   }
 
   clearEditor(): void {
-    if (this.editor) this.editor.nativeElement.innerHTML = '<p><br></p>';
+    if (this.editor) this.editor.nativeElement.innerHTML = '<br>';
     this.selectedImage = undefined;
     this.savedRange = undefined;
   }
@@ -146,7 +146,8 @@ export class TriadShapesComponent {
     reader.onload = () => {
       const raw = String(reader.result ?? '');
       if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
-        this.editor!.nativeElement.innerHTML = this.escapeHtml(raw).replace(/\r\n?|\n/g, '<br>') || '<br>';
+        const textHtml = this.escapeHtml(raw).replace(/\r\n?|\n/g, '<br>') || '<br>';
+        this.editor!.nativeElement.innerHTML = `<span style="font-weight:400">${textHtml}</span>`;
       } else {
         this.editor!.nativeElement.innerHTML = this.sanitizeLoadedHtml(raw);
       }
@@ -213,9 +214,9 @@ h1, h2, h3 { font-family: Georgia, serif; }
     selection?.addRange(this.savedRange);
   }
 
-  private insertImage(source: string, alt: string): void {
+  private insertImage(source: string, alt: string, width: number): void {
     const safeAlt = alt.replace(/[&<>"']/g, '');
-    this.insertHtml(`<span class="resizable-image" contenteditable="false" style="width:320px"><img src="${source}" alt="${safeAlt}"></span><p><br></p>`);
+    this.insertHtml(`<span class="resizable-image" contenteditable="false" style="width:${width}px"><img src="${source}" alt="${safeAlt}"></span>&#8203;`);
   }
 
   private insertHtml(html: string): void {
