@@ -50,6 +50,13 @@
               <input type="number" min="1" max="240" [value]="segment.plannedMinutes" (change)="updateSegmentMinutes(segment, $any($event.target).valueAsNumber)">
               <small>min</small>
             </label>
+            <time class="segment-elapsed">{{ formatTime(segment.elapsedSeconds) }}</time>
+            <div class="segment-inline-controls">
+              <button type="button" (click)="startSegment(segment)">
+                {{ activeSegmentId === segment.id && timerRunning ? 'Stop' : segment.elapsedSeconds ? 'Resume' : 'Start' }}
+              </button>
+              <button type="button" (click)="resetSegment(segment)">Reset</button>
+            </div>
             <button class="segment-remove" type="button" aria-label="Remove division" (click)="removeSegment(segment)">×</button>
           </div>
         }
