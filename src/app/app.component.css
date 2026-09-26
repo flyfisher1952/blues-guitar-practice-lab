@@ -7,6 +7,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
   color: var(--paper);
   background: var(--ink);
 }
@@ -23,8 +26,8 @@
   justify-content: space-between;
   gap: 24px;
   position: sticky;
-  top: 0;
-  z-index: 10;
+  top: 54px;
+  z-index: 19;
   background: rgba(243, 236, 223, .96);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(12px);
@@ -140,7 +143,7 @@ main { min-height: calc(100vh - 196px); }
   width: 12px;
   min-height: calc(100vh - 180px);
   position: sticky;
-  top: 86px;
+  top: 140px;
   align-self: stretch;
   border: 0;
   background: transparent;
@@ -151,7 +154,7 @@ main { min-height: calc(100vh - 196px); }
 .workspace-divider:hover span, .workspace-divider:focus-visible span, .triad-workspace.resizing .workspace-divider span { width: 5px; background: var(--red); }
 .workspace-divider:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
 
-.notes-workspace { position: sticky; top: 86px; min-width: 0; margin-left: clamp(12px, 2vw, 26px); padding: 20px; color: var(--ink); background: #e7dccb; border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(23, 19, 15, .15); }
+.notes-workspace { position: sticky; top: 140px; min-width: 0; margin-left: clamp(12px, 2vw, 26px); padding: 20px; color: var(--ink); background: #e7dccb; border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(23, 19, 15, .15); }
 .editor-heading { display: flex; justify-content: space-between; align-items: start; gap: 20px; }
 .editor-heading h2 { margin: 0; font: 2.2rem/1 "Newsreader", serif; }
 .editor-file-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
