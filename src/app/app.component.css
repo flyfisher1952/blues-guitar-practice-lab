@@ -5,7 +5,7 @@
   padding: 8px clamp(20px, 5vw, 72px);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 24px;
   position: sticky;
   top: 0;
@@ -86,7 +86,9 @@ main { min-height: calc(100vh - 196px); }
 .triad-library { min-width: 0; padding-right: clamp(12px, 2vw, 26px); padding-bottom: 24px; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
 .triad-heading { margin-bottom: 24px; }
 .triad-heading h1 { font-size: clamp(2.25rem, 3.7vw, 4rem); }
-.orientation { max-width: 330px; margin: 0; color: var(--muted); text-align: right; line-height: 1.45; }
+.triad-key-select { display: flex; align-items: center; gap: 10px; }
+.triad-key-select span { color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .12em; }
+.triad-key-select select { min-width: 126px; min-height: 44px; padding: 0 36px 0 12px; border: 1px solid var(--ink); color: var(--ink); background: var(--paper); font-weight: 700; cursor: pointer; }
 .mode-picker { display: flex; align-items: center; gap: 8px; margin: -5px 0 22px; padding: 13px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .mode-picker > span { margin-right: 7px; color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .12em; }
 .mode-picker button { min-width: 84px; padding: 0 14px; border: 1px solid var(--ink); color: var(--ink); background: transparent; font-size: .82rem; font-weight: 700; cursor: pointer; }
@@ -303,7 +305,7 @@ footer { padding: 24px clamp(20px, 5vw, 72px); display: flex; justify-content: s
   .tabs button { padding: 0 10px; font-size: .75rem; }
   .key-select select { width: 92px; min-width: 92px; font-size: .76rem; }
   .panel-heading { display: block; }
-  .orientation { margin-top: 14px; text-align: left; }
+  .triad-key-select { margin-top: 14px; }
   .session-grid { grid-template-columns: 1fr; }
   .session-card { min-height: 190px; border-right: 0; border-bottom: 1px solid var(--line); }
   .session-card:last-child { border-bottom: 0; }
