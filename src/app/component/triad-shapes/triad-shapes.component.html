@@ -198,6 +198,25 @@
             </div>
           }
         </div>
+
+        <div class="document-menu" (mouseenter)="activateMenu('insert')">
+          <button
+            type="button"
+            class="menu-trigger"
+            role="menuitem"
+            aria-haspopup="true"
+            [attr.aria-expanded]="openMenu === 'insert'"
+            (click)="toggleMenu('insert')">Insert</button>
+          @if (openMenu === 'insert') {
+            <div class="menu-dropdown insert-menu" role="menu">
+              <button
+                type="button"
+                role="menuitem"
+                (mousedown)="$event.preventDefault()"
+                (click)="insertPageBreak(); closeMenus()">Page Break</button>
+            </div>
+          }
+        </div>
       </div>
 
       <div class="image-size-control" [class.enabled]="selectedImage">
