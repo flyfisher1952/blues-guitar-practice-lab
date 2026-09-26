@@ -29,6 +29,10 @@ export class SessionComponent implements OnInit, OnDestroy {
   segments: PracticeSegment[] = [];
   history: PracticeDay[] = [];
   monitorOpen = false;
+  addSegmentOpen = false;
+  newSegmentName = '';
+  newSegmentHint = '';
+  newSegmentMinutes = 5;
   activeSegmentId?: string;
   timerRunning = false;
   private timer?: number;
@@ -94,30 +98,48 @@ export class SessionComponent implements OnInit, OnDestroy {
 
   updateSegmentMinutes(segment: PracticeSegment, value: number): void {
     segment.plannedMinutes = this.clamp(value, 1, 240, 5);
+    this.syncTotalDuration();
     this.persistPlan();
   }
 
   toggleSegment(segment: PracticeSegment, enabled: boolean): void {
     segment.enabled = enabled;
     if (!enabled && this.activeSegmentId === segment.id) this.stopSegment(segment);
+    this.syncTotalDuration();
     this.persistPlan();
   }
 
+  openAddSegment(): void {
+    this.newSegmentName = '';
+    this.newSegmentHint = '';
+    this.newSegmentMinutes = 5;
+    this.addSegmentOpen = true;
+  }
+
+  closeAddSegment(): void {
+    this.addSegmentOpen = false;
+  }
+
   addSegment(): void {
+    const name = this.newSegmentName.trim();
+    if (!name) return;
     this.segments.push({
       id: crypto.randomUUID?.() ?? `segment-${Date.now()}`,
-      name: 'New segment',
-      description: '',
+      name,
+      description: this.newSegmentHint.trim(),
       enabled: true,
-      plannedMinutes: 5,
+      plannedMinutes: this.clamp(this.newSegmentMinutes, 1, 240, 5),
       elapsedSeconds: 0
     });
+    this.syncTotalDuration();
     this.persistPlan();
+    this.addSegmentOpen = false;
   }
 
   removeSegment(segment: PracticeSegment): void {
     if (this.activeSegmentId === segment.id) this.stopSegment(segment);
     this.segments = this.segments.filter(item => item.id !== segment.id);
+    this.syncTotalDuration();
     this.persistPlan();
   }
 
@@ -131,11 +153,7 @@ export class SessionComponent implements OnInit, OnDestroy {
 
   startSegment(segment: PracticeSegment): void {
     if (!segment.enabled) return;
-    if (this.activeSegmentId === segment.id && this.timerRunning) {
-      this.stopSegment(segment);
-      return;
-    }
-    this.stopClock();
+    this.stopClock(true);
     this.activeSegmentId = segment.id;
     this.timerRunning = true;
     this.timer = window.setInterval(() => {
@@ -144,12 +162,18 @@ export class SessionComponent implements OnInit, OnDestroy {
     }, 1000);
   }
 
-  stopSegment(_segment?: PracticeSegment): void {
-    this.stopClock();
+  pauseSegment(segment: PracticeSegment): void {
+    if (this.activeSegmentId !== segment.id || !this.timerRunning) return;
+    this.stopClock(false);
+  }
+
+  stopSegment(segment?: PracticeSegment): void {
+    if (segment && this.activeSegmentId !== segment.id) return;
+    this.stopClock(true);
   }
 
   resetSegment(segment: PracticeSegment): void {
-    if (this.activeSegmentId === segment.id) this.stopClock();
+    if (this.activeSegmentId === segment.id) this.stopClock(true);
     segment.elapsedSeconds = 0;
   }
 
@@ -185,11 +209,15 @@ export class SessionComponent implements OnInit, OnDestroy {
     return Object.values(day.segments).reduce((sum, seconds) => sum + seconds, 0);
   }
 
-  private stopClock(): void {
+  private stopClock(clearActive = true): void {
     this.timerRunning = false;
     if (this.timer !== undefined) window.clearInterval(this.timer);
     this.timer = undefined;
-    this.activeSegmentId = undefined;
+    if (clearActive) this.activeSegmentId = undefined;
+  }
+
+  private syncTotalDuration(): void {
+    this.totalMinutes = Math.max(1, this.plannedMinutes);
   }
 
   private recordSecond(segmentName: string): void {
@@ -217,6 +245,7 @@ export class SessionComponent implements OnInit, OnDestroy {
           elapsedSeconds: 0,
           plannedMinutes: this.clamp(segment.plannedMinutes, 1, 240, 5)
         }));
+        this.syncTotalDuration();
         return;
       }
     } catch {
@@ -231,6 +260,7 @@ export class SessionComponent implements OnInit, OnDestroy {
       plannedMinutes: 5,
       elapsedSeconds: 0
     }));
+    this.syncTotalDuration();
   }
 
   private restoreHistory(): void {
