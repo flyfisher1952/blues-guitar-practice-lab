@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-source_dir="dist/blues-guitar-practice-lab/browser"
+source_dir="dist"
 iis_dir="/c/inetpub/blues-guitar-practice-lab"
 
 if [[ ! -f "$source_dir/index.html" ]]; then
@@ -12,7 +12,7 @@ if [[ ! -f "$source_dir/index.html" ]]; then
 fi
 
 mkdir -p "$iis_dir"
-cp -R "$source_dir/." "$iis_dir/"
+cp -R "$source_dir/*" "$iis_dir/"
 
 echo "Deployment completed."
 echo "Open http://localhost"
