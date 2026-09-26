@@ -1,6 +1,6 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
 import { asBlob } from 'html-docx-js-typescript';
-import { ChordMode, TriadGroup, TriadShape } from '../../model/models';
+import { ChordMode, KeyOption, TriadGroup, TriadShape } from '../../model/models';
 
 type WritableFile = { write(data: Blob): Promise<void>; close(): Promise<void> };
 type SaveFileHandle = { createWritable(): Promise<WritableFile> };
@@ -23,8 +23,10 @@ export class TriadShapesComponent {
   @ViewChild('workspace') private workspace?: ElementRef<HTMLDivElement>;
 
   @Input({ required: true }) selectedKey = '';
+  @Input({ required: true }) keys: readonly KeyOption[] = [];
   @Input({ required: true }) chordMode: ChordMode = 'major';
   @Input({ required: true }) triadShapes: readonly TriadGroup[] = [];
+  @Output() selectedKeyChange = new EventEmitter<string>();
   @Output() chordModeChange = new EventEmitter<ChordMode>();
 
   selectedImage?: HTMLElement;
