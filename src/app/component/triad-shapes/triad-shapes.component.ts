@@ -101,6 +101,16 @@ export class TriadShapesComponent implements AfterViewInit {
     if (this.openMenu) this.openMenu = menu;
   }
 
+  changeSelectedKey(key: string): void {
+    this.selectedKeyChange.emit(key);
+    window.setTimeout(() => this.saveLastDocument());
+  }
+
+  changeChordMode(mode: ChordMode): void {
+    this.chordModeChange.emit(mode);
+    window.setTimeout(() => this.saveLastDocument());
+  }
+
   usedStringIndices(shape: TriadShape): number[] {
     return shape.frets
       .map((fret, index) => fret === null ? -1 : index)
@@ -316,6 +326,8 @@ export class TriadShapesComponent implements AfterViewInit {
         this.applyPreferences(settings);
         this.selectedImage = undefined;
         this.savedRange = undefined;
+        this.settingsOpen = false;
+        this.saveLastDocument();
       } catch (error) {
         console.error('Settings load failed', error);
         window.alert('That file is not a valid practice-document settings file.');
@@ -369,6 +381,7 @@ export class TriadShapesComponent implements AfterViewInit {
     const blob = new Blob([documentHtml], { type: 'text/html;charset=utf-8' });
     await this.writeSavedFile(blob, suggestedName, handle);
     this.currentDocumentName = documentName;
+    this.saveLastDocument();
   }
 
   async saveDocx(): Promise<void> {
