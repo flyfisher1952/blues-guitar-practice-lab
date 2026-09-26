@@ -1,5 +1,16 @@
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { asBlob } from 'html-docx-js-typescript';
 import { ChordMode, TriadGroup, TriadShape } from '../../model/models';
+
+type WritableFile = { write(data: Blob): Promise<void>; close(): Promise<void> };
+type SaveFileHandle = { createWritable(): Promise<WritableFile> };
+type SaveFilePickerOptions = {
+  suggestedName: string;
+  types: Array<{ description: string; accept: Record<string, string[]> }>;
+};
+type SavePickerWindow = Window & {
+  showSaveFilePicker?: (options: SaveFilePickerOptions) => Promise<SaveFileHandle>;
+};
 
 @Component({
   selector: 'app-triad-shapes',
@@ -164,29 +175,53 @@ export class TriadShapesComponent {
     reader.readAsText(file);
   }
 
-  saveEditor(): void {
+  async saveHtml(): Promise<void> {
     if (!this.editor) return;
-    const documentHtml = `<!doctype html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>${this.escapeHtml(this.selectedKey)} practice notes</title>
-<style>
-body { max-width: 900px; margin: 32px auto; padding: 0 24px; color: #17130f; font-family: Arial, sans-serif; line-height: 1.55; }
-h1, h2, h3 { font-family: Georgia, serif; }
-.resizable-image { display: inline-block; max-width: 100%; margin: 8px; vertical-align: top; }
-.resizable-image img { display: block; width: 100%; height: auto; }
-</style>
-</head>
-<body><main id="practice-notes">${this.editor.nativeElement.innerHTML}</main></body>
-</html>`;
+    const suggestedName = this.suggestedFileName('html');
+    const handle = await this.chooseSaveHandle(suggestedName, 'HTML document', 'text/html', '.html');
+    if (handle === null) return;
+
+    const documentHtml = this.buildDocumentHtml(
+      this.editor.nativeElement.innerHTML,
+      `${this.selectedKey} practice notes`
+    );
     const blob = new Blob([documentHtml], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = `${this.selectedKey.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-practice-notes.html`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+    await this.writeSavedFile(blob, suggestedName, handle);
+  }
+
+  async saveDocx(): Promise<void> {
+    if (!this.editor) return;
+    const suggestedName = this.suggestedFileName('docx');
+    const handle = await this.chooseSaveHandle(
+      suggestedName,
+      'Microsoft Word document',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      '.docx'
+    );
+    if (handle === null) return;
+
+    try {
+      const editorCopy = this.editor.nativeElement.cloneNode(true) as HTMLElement;
+      await this.convertSvgImagesToPng(editorCopy);
+      const documentHtml = this.buildDocumentHtml(
+        editorCopy.innerHTML,
+        `${this.selectedKey} practice notes`,
+        false
+      );
+      const generated = await asBlob(documentHtml, {
+        orientation: 'portrait',
+        margins: { top: 720, right: 720, bottom: 720, left: 720 }
+      });
+      const blob = generated instanceof Blob
+        ? generated
+        : new Blob([generated as unknown as BlobPart], {
+            type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          });
+      await this.writeSavedFile(blob, suggestedName, handle);
+    } catch (error) {
+      console.error('DOCX export failed', error);
+      window.alert('The Word document could not be created.');
+    }
   }
 
   printEditor(): void {
@@ -224,6 +259,107 @@ h1, h2, h3 { font-family: Georgia, serif; }
 </html>`);
     printWindow.document.close();
     printWindow.focus();
+  }
+
+  private suggestedFileName(extension: 'html' | 'docx'): string {
+    const keyName = this.selectedKey.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase();
+    return `${keyName || 'blues'}-practice-notes.${extension}`;
+  }
+
+  private buildDocumentHtml(innerHtml: string, title: string, includeWebFonts = true): string {
+    const fontLinks = includeWebFonts
+      ? '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,700&display=swap" rel="stylesheet">'
+      : '';
+    return `<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${this.escapeHtml(title)}</title>
+${fontLinks}
+<style>
+* { box-sizing: border-box; }
+html { background: #f3ecdf; }
+body { margin: 0; padding: 32px; color: #17130f; background: #f3ecdf; font-family: "DM Sans", Arial, sans-serif; font-size: 16px; font-weight: 400; line-height: 1.1; }
+#practice-notes { max-width: 900px; min-height: 600px; margin: 0 auto; padding: 24px; background: #fffdf8; border: 1px solid #8c8073; }
+#practice-notes p { margin: 0; }
+#practice-notes h1, #practice-notes h2, #practice-notes h3 { font-family: "Newsreader", Georgia, serif; }
+#practice-notes .resizable-image { display: inline-block; max-width: 100%; margin: 2px; overflow: hidden; vertical-align: top; border: 2px solid transparent; }
+#practice-notes .resizable-image img { display: block; width: 100%; height: auto; object-fit: contain; }
+</style>
+</head>
+<body><main id="practice-notes">${innerHtml}</main></body>
+</html>`;
+  }
+
+  private async chooseSaveHandle(
+    suggestedName: string,
+    description: string,
+    mimeType: string,
+    extension: string
+  ): Promise<SaveFileHandle | null | undefined> {
+    const picker = (window as SavePickerWindow).showSaveFilePicker;
+    if (!picker) return undefined;
+    try {
+      return await picker.call(window, {
+        suggestedName,
+        types: [{ description, accept: { [mimeType]: [extension] } }]
+      });
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return null;
+      console.warn('Save As dialog unavailable; using browser download instead.', error);
+      return undefined;
+    }
+  }
+
+  private async writeSavedFile(
+    blob: Blob,
+    suggestedName: string,
+    handle: SaveFileHandle | undefined
+  ): Promise<void> {
+    if (handle) {
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = suggestedName;
+    anchor.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  private async convertSvgImagesToPng(root: HTMLElement): Promise<void> {
+    const images = Array.from(root.querySelectorAll<HTMLImageElement>('img'));
+    await Promise.all(images.map(async image => {
+      if (!image.src.startsWith('data:image/svg+xml')) return;
+      image.src = await this.svgDataUrlToPng(image.src);
+    }));
+  }
+
+  private svgDataUrlToPng(source: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        const scale = 3;
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, image.naturalWidth * scale);
+        canvas.height = Math.max(1, image.naturalHeight * scale);
+        const context = canvas.getContext('2d');
+        if (!context) {
+          reject(new Error('Canvas is unavailable.'));
+          return;
+        }
+        context.scale(scale, scale);
+        context.drawImage(image, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      image.onerror = () => reject(new Error('A triad image could not be converted for Word.'));
+      image.src = source;
+    });
   }
 
   private restoreSelection(): void {
