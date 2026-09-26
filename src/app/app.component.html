@@ -43,7 +43,8 @@
 
   @if (activeTab() === 'grooves') {
     <app-build-loop
-      [selectedKey]="key()"
+      [selectedKey]="loopKey()"
+      [keys]="keys"
       [groove]="groove()"
       [grooveStyle]="grooveStyle()"
       [tempo]="tempo()"
