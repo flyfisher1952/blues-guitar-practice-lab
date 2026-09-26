@@ -15,6 +15,7 @@ export class BuildLoopComponent {
     preferFlats: false
   };
   @Input({ required: true }) keys: readonly KeyOption[] = [];
+  @Input({ required: true }) mode: 'major' | 'minor' = 'major';
   @Input({ required: true }) groove: Groove = {
     bars: [],
     hand: '',
@@ -26,6 +27,7 @@ export class BuildLoopComponent {
   @Input() tempo = 72;
 
   @Output() selectedKeyChange = new EventEmitter<string>();
+  @Output() modeChange = new EventEmitter<'major' | 'minor'>();
   @Output() grooveStyleChange = new EventEmitter<GrooveStyle>();
   @Output() tempoChange = new EventEmitter<number>();
 
@@ -33,14 +35,21 @@ export class BuildLoopComponent {
 
   chordFor(roman: string): string {
     const [one, four, five] = this.selectedKey.chordNames;
-    const map: Record<string, string> = {
+    const major: Record<string, string> = {
       I: `${one}7`,
       IV: `${four}7`,
       V: `${five}7`,
       II: this.noteAt(this.selectedKey.pitchClass + 2) + '7',
       VI: this.noteAt(this.selectedKey.pitchClass + 9) + '7'
     };
-    return map[roman] ?? roman;
+    const minor: Record<string, string> = {
+      I: `${one}m7`,
+      IV: `${four}m7`,
+      V: `${five}7`,
+      II: this.noteAt(this.selectedKey.pitchClass + 2) + 'm7♭5',
+      VI: this.noteAt(this.selectedKey.pitchClass + 8) + 'maj7'
+    };
+    return (this.mode === 'minor' ? minor : major)[roman] ?? roman;
   }
 
   private noteAt(pitch: number): string {
