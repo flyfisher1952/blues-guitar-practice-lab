@@ -54,7 +54,7 @@ export class TriadShapesComponent {
   libraryWidth = 52;
   resizing = false;
   currentDocumentName = 'Untitled practice document';
-  openMenu?: 'file' | 'edit';
+  openMenu?: 'file' | 'edit' | 'insert';
   readonly stringNumbers = [6, 5, 4, 3, 2, 1];
   private savedRange?: Range;
   private imageSequence = 0;
@@ -64,11 +64,11 @@ export class TriadShapesComponent {
     this.openMenu = undefined;
   }
 
-  toggleMenu(menu: 'file' | 'edit'): void {
+  toggleMenu(menu: 'file' | 'edit' | 'insert'): void {
     this.openMenu = this.openMenu === menu ? undefined : menu;
   }
 
-  activateMenu(menu: 'file' | 'edit'): void {
+  activateMenu(menu: 'file' | 'edit' | 'insert'): void {
     if (this.openMenu) this.openMenu = menu;
   }
 
@@ -160,6 +160,13 @@ export class TriadShapesComponent {
     this.restoreSelection();
     document.execCommand(command, false, value);
     this.rememberSelection();
+  }
+
+  insertPageBreak(): void {
+    this.restoreSelection();
+    this.insertHtml(
+      '<div class="page-break" contenteditable="false" aria-label="Page break"></div><p><br></p>'
+    );
   }
 
   selectEditorImage(event: MouseEvent): void {
@@ -351,9 +358,11 @@ body { margin: 0; color: #17130f; font-family: Arial, sans-serif; line-height: 1
 h1, h2, h3 { font-family: Georgia, serif; }
 .resizable-image { display: inline-block; max-width: 100%; margin: 2px; vertical-align: top; break-inside: avoid; }
 .resizable-image img { display: block; width: 100%; height: auto; }
+.page-break { height: 0; margin: 24px 0; border-top: 2px dashed #8c8073; break-before: page; page-break-before: always; }
 @media print {
   .print-controls { display: none; }
   .print-content { padding: 0; }
+  .page-break { margin: 0; border: 0; }
 }
 </style>
 </head>
@@ -399,6 +408,8 @@ body { margin: 0; padding: 32px; color: #17130f; background: #f3ecdf; font-famil
 #practice-notes h1, #practice-notes h2, #practice-notes h3 { font-family: "Newsreader", Georgia, serif; }
 #practice-notes .resizable-image { display: inline-block; max-width: 100%; margin: 2px; overflow: hidden; vertical-align: top; border: 2px solid transparent; }
 #practice-notes .resizable-image img { display: block; width: 100%; height: auto; object-fit: contain; }
+#practice-notes .page-break { height: 0; margin: 24px 0; border-top: 2px dashed #8c8073; break-before: page; page-break-before: always; }
+@media print { #practice-notes .page-break { margin: 0; border: 0; } }
 </style>
 </head>
 <body><main id="practice-notes" data-practice-key="${this.escapeAttribute(this.selectedKey)}" data-chord-mode="${this.escapeAttribute(this.chordMode)}" data-document-name="${this.escapeAttribute(documentName)}">${innerHtml}</main></body>
