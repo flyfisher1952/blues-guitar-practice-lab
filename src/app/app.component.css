@@ -155,26 +155,20 @@ main { min-height: calc(100vh - 176px); }
 }
 .workspace-divider span { width: 3px; height: 100%; margin: 0 auto; position: relative; display: block; background: #b8aa98; transition: width .15s, background .15s; }
 .workspace-divider span::after {
-  content: "•••";
-  width: 18px;
-  padding: 7px 0;
+  content: "⋮";
+  width: 8px;
   position: absolute;
   top: 50%;
   left: 50%;
-  color: white;
-  background: #766d62;
-  border: 2px solid var(--paper);
-  border-radius: 10px;
-  font-size: 10px;
+  color: #766d62;
+  font-size: 20px;
+  font-weight: 800;
   line-height: 1;
-  letter-spacing: 1px;
   text-align: center;
-  writing-mode: vertical-rl;
   transform: translate(-50%, -50%);
-  box-shadow: 0 2px 6px rgba(23, 19, 15, .25);
 }
 .workspace-divider:hover span, .workspace-divider:focus-visible span, .triad-workspace.resizing .workspace-divider span { width: 5px; background: var(--red); }
-.workspace-divider:hover span::after, .workspace-divider:focus-visible span::after, .triad-workspace.resizing .workspace-divider span::after { background: var(--red); }
+.workspace-divider:hover span::after, .workspace-divider:focus-visible span::after, .triad-workspace.resizing .workspace-divider span::after { color: var(--red); }
 .workspace-divider:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
 
 .notes-workspace { height: 100%; min-width: 0; margin-left: clamp(10px, 1.5vw, 20px); padding: 14px; display: flex; flex-direction: column; overflow: hidden; color: var(--ink); background: #e7dccb; border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(23, 19, 15, .15); }
@@ -301,7 +295,7 @@ main { min-height: calc(100vh - 176px); }
 .manual-image-size { display: flex; align-items: center; gap: 4px; }
 .manual-image-size input { width: 60px; min-height: 32px; padding: 3px 5px; border: 1px solid #8c8073; background: #fffdf8; text-align: right; }
 .manual-image-size span { text-align: left; }
-.rich-editor { min-height: 0; flex: 1 1 auto; padding: 24px; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; color: var(--ink); background: #fffdf8; border: 1px solid #8c8073; font-weight: 400; line-height: 1.1; }
+.rich-editor { min-height: 0; flex: 1 1 auto; padding: 24px; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; color: var(--ink); background: #fffdf8; border: 1px solid #8c8073; font-weight: 400; line-height: 1.1; white-space: pre-wrap; }
 .rich-editor p { margin: 0; }
 .rich-editor:focus { outline: 3px solid var(--amber); outline-offset: 2px; }
 .rich-editor h2, .rich-editor h3 { font-family: "Newsreader", serif; }
