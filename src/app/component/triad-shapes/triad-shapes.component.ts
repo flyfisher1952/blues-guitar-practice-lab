@@ -4,11 +4,22 @@ import { ChordMode, KeyOption, TriadGroup, TriadShape } from '../../model/models
 
 type WritableFile = { write(data: Blob): Promise<void>; close(): Promise<void> };
 type SaveFileHandle = { name: string; createWritable(): Promise<WritableFile> };
+type OpenFileHandle = { getFile(): Promise<File> };
+type FilePickerType = { description: string; accept: Record<string, string[]> };
 type SaveFilePickerOptions = {
+  id: string;
+  startIn: 'documents';
   suggestedName: string;
-  types: Array<{ description: string; accept: Record<string, string[]> }>;
+  types: FilePickerType[];
 };
-type SavePickerWindow = Window & {
+type OpenFilePickerOptions = {
+  id: string;
+  startIn: 'documents';
+  multiple: false;
+  types: FilePickerType[];
+};
+type FilePickerWindow = Window & {
+  showOpenFilePicker?: (options: OpenFilePickerOptions) => Promise<OpenFileHandle[]>;
   showSaveFilePicker?: (options: SaveFilePickerOptions) => Promise<SaveFileHandle>;
 };
 
@@ -177,34 +188,40 @@ export class TriadShapesComponent {
     this.savedRange = undefined;
   }
 
-  chooseEditorFile(): void {
-    this.fileInput?.nativeElement.click();
+  async chooseEditorFile(): Promise<void> {
+    const picker = (window as FilePickerWindow).showOpenFilePicker;
+    if (!picker) {
+      this.fileInput?.nativeElement.click();
+      return;
+    }
+
+    try {
+      const handles = await picker.call(window, {
+        id: 'practice-documents',
+        startIn: 'documents',
+        multiple: false,
+        types: [{
+          description: 'Practice documents',
+          accept: {
+            'text/html': ['.html', '.htm'],
+            'text/plain': ['.txt']
+          }
+        }]
+      });
+      const handle = handles[0];
+      if (handle) await this.openEditorFile(await handle.getFile());
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      console.warn('Open dialog unavailable; using the browser file input instead.', error);
+      this.fileInput?.nativeElement.click();
+    }
   }
 
   loadEditorFile(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     input.value = '';
-    if (!file || file.size > 12 * 1024 * 1024 || !this.editor) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const raw = String(reader.result ?? '');
-      if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
-        const textHtml = this.escapeHtml(raw).replace(/\r\n?|\n/g, '<br>') || '<br>';
-        this.editor!.nativeElement.innerHTML = `<span style="font-weight:400">${textHtml}</span>`;
-        this.currentDocumentName = file.name;
-      } else {
-        const parsed = new DOMParser().parseFromString(raw, 'text/html');
-        const notes = parsed.querySelector<HTMLElement>('#practice-notes');
-        this.restorePracticeContext(notes?.dataset['practiceKey'], notes?.dataset['chordMode']);
-        this.currentDocumentName = notes?.dataset['documentName']?.trim() || file.name;
-        this.editor!.nativeElement.innerHTML = this.sanitizeLoadedHtml(raw);
-      }
-      this.selectedImage = undefined;
-      this.savedRange = undefined;
-    };
-    reader.readAsText(file);
+    if (file) void this.openEditorFile(file);
   }
 
   chooseSettingsFile(): void {
@@ -244,7 +261,8 @@ export class TriadShapesComponent {
       suggestedName,
       'Practice document settings',
       'application/json',
-      '.json'
+      '.json',
+      'practice-settings'
     );
     if (handle === null) return;
 
@@ -391,12 +409,15 @@ body { margin: 0; padding: 32px; color: #17130f; background: #f3ecdf; font-famil
     suggestedName: string,
     description: string,
     mimeType: string,
-    extension: string
+    extension: string,
+    pickerId = 'practice-documents'
   ): Promise<SaveFileHandle | null | undefined> {
-    const picker = (window as SavePickerWindow).showSaveFilePicker;
+    const picker = (window as FilePickerWindow).showSaveFilePicker;
     if (!picker) return undefined;
     try {
       return await picker.call(window, {
+        id: pickerId,
+        startIn: 'documents',
         suggestedName,
         types: [{ description, accept: { [mimeType]: [extension] } }]
       });
@@ -405,6 +426,25 @@ body { margin: 0; padding: 32px; color: #17130f; background: #f3ecdf; font-famil
       console.warn('Save As dialog unavailable; using browser download instead.', error);
       return undefined;
     }
+  }
+
+  private async openEditorFile(file: File): Promise<void> {
+    if (file.size > 12 * 1024 * 1024 || !this.editor) return;
+
+    const raw = await file.text();
+    if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
+      const textHtml = this.escapeHtml(raw).replace(/\r\n?|\n/g, '<br>') || '<br>';
+      this.editor.nativeElement.innerHTML = `<span style="font-weight:400">${textHtml}</span>`;
+      this.currentDocumentName = file.name;
+    } else {
+      const parsed = new DOMParser().parseFromString(raw, 'text/html');
+      const notes = parsed.querySelector<HTMLElement>('#practice-notes');
+      this.restorePracticeContext(notes?.dataset['practiceKey'], notes?.dataset['chordMode']);
+      this.currentDocumentName = notes?.dataset['documentName']?.trim() || file.name;
+      this.editor.nativeElement.innerHTML = this.sanitizeLoadedHtml(raw);
+    }
+    this.selectedImage = undefined;
+    this.savedRange = undefined;
   }
 
   private async writeSavedFile(
