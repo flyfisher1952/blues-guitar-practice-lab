@@ -93,7 +93,7 @@
       <div class="document-menu-bar" role="menubar" aria-label="Practice document menu" (click)="$event.stopPropagation()">
         <input #fileInput class="visually-hidden" type="file" accept=".html,.htm,.txt,text/html,text/plain" (change)="loadEditorFile($event)">
 
-        <div class="document-menu">
+        <div class="document-menu" (mouseenter)="activateMenu('file')">
           <button
             type="button"
             class="menu-trigger"
@@ -113,7 +113,7 @@
           }
         </div>
 
-        <div class="document-menu">
+        <div class="document-menu" (mouseenter)="activateMenu('edit')">
           <button
             type="button"
             class="menu-trigger"
