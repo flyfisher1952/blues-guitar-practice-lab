@@ -93,6 +93,11 @@ export class TriadShapesComponent implements AfterViewInit {
     this.openMenu = undefined;
   }
 
+  @HostListener('window:practice-settings-updated')
+  refreshSavedPreferences(): void {
+    this.restorePreferences();
+  }
+
   toggleMenu(menu: 'file' | 'edit' | 'insert'): void {
     this.openMenu = this.openMenu === menu ? undefined : menu;
   }
