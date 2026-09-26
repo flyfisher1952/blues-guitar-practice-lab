@@ -69,19 +69,21 @@ main { min-height: calc(100vh - 196px); }
 
 .dark-panel { min-height: calc(100vh - 120px); color: var(--paper); background: var(--ink); }
 .triad-panel {
-  min-height: calc(100vh - 120px);
-  padding: 30px clamp(16px, 3vw, 48px) 56px;
+  height: calc(100vh - 120px);
+  padding: 30px clamp(16px, 3vw, 48px);
+  overflow: hidden;
   color: var(--ink);
   background: var(--paper);
 }
 .triad-workspace {
   --library-width: 52%;
+  height: 100%;
   display: grid;
   grid-template-columns: minmax(0, var(--library-width)) 12px minmax(0, 1fr);
-  align-items: start;
+  align-items: stretch;
 }
 .triad-workspace.resizing, .triad-workspace.resizing * { cursor: col-resize !important; user-select: none; }
-.triad-library { min-width: 0; padding-right: clamp(12px, 2vw, 26px); }
+.triad-library { min-width: 0; padding-right: clamp(12px, 2vw, 26px); padding-bottom: 24px; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
 .triad-heading { margin-bottom: 24px; }
 .triad-heading h1 { font-size: clamp(2.25rem, 3.7vw, 4rem); }
 .orientation { max-width: 330px; margin: 0; color: var(--muted); text-align: right; line-height: 1.45; }
@@ -141,20 +143,18 @@ main { min-height: calc(100vh - 196px); }
 
 .workspace-divider {
   width: 12px;
-  min-height: calc(100vh - 180px);
-  position: sticky;
-  top: 140px;
+  height: 100%;
   align-self: stretch;
   border: 0;
   background: transparent;
   cursor: col-resize;
   touch-action: none;
 }
-.workspace-divider span { width: 3px; height: 100%; min-height: calc(100vh - 180px); margin: 0 auto; display: block; background: #b8aa98; transition: width .15s, background .15s; }
+.workspace-divider span { width: 3px; height: 100%; margin: 0 auto; display: block; background: #b8aa98; transition: width .15s, background .15s; }
 .workspace-divider:hover span, .workspace-divider:focus-visible span, .triad-workspace.resizing .workspace-divider span { width: 5px; background: var(--red); }
 .workspace-divider:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
 
-.notes-workspace { position: sticky; top: 140px; min-width: 0; margin-left: clamp(12px, 2vw, 26px); padding: 20px; color: var(--ink); background: #e7dccb; border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(23, 19, 15, .15); }
+.notes-workspace { height: 100%; min-width: 0; margin-left: clamp(12px, 2vw, 26px); padding: 20px; display: flex; flex-direction: column; overflow: hidden; color: var(--ink); background: #e7dccb; border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(23, 19, 15, .15); }
 .editor-heading { display: flex; justify-content: space-between; align-items: start; gap: 20px; }
 .editor-heading h2 { margin: 0; font: 2.2rem/1 "Newsreader", serif; }
 .editor-file-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
@@ -174,7 +174,7 @@ main { min-height: calc(100vh - 196px); }
 .image-size-control.enabled { color: var(--ink); }
 .image-size-control input { width: 100%; accent-color: var(--red); }
 .image-size-control span { text-align: right; }
-.rich-editor { height: calc(100vh - 365px); min-height: 460px; padding: 24px; overflow: auto; color: var(--ink); background: #fffdf8; border: 1px solid #8c8073; font-weight: 400; line-height: 1.1; }
+.rich-editor { min-height: 0; flex: 1 1 auto; padding: 24px; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; color: var(--ink); background: #fffdf8; border: 1px solid #8c8073; font-weight: 400; line-height: 1.1; }
 .rich-editor p { margin: 0; }
 .rich-editor:focus { outline: 3px solid var(--amber); outline-offset: 2px; }
 .rich-editor h2, .rich-editor h3 { font-family: "Newsreader", serif; }
@@ -209,11 +209,12 @@ main { min-height: calc(100vh - 196px); }
 footer { padding: 24px clamp(20px, 5vw, 72px); display: flex; justify-content: space-between; color: #a99d90; background: var(--ink); font-size: .7rem; letter-spacing: .1em; }
 
 @media (max-width: 1000px) {
-  .triad-workspace { grid-template-columns: 1fr; }
-  .triad-library { padding-right: 0; }
+  .triad-panel { height: auto; min-height: calc(100vh - 120px); overflow: visible; }
+  .triad-workspace { height: auto; grid-template-columns: 1fr; }
+  .triad-library { padding-right: 0; overflow: visible; }
   .workspace-divider { display: none; }
-  .notes-workspace { position: static; margin: 24px 0 0; }
-  .rich-editor { height: 620px; }
+  .notes-workspace { height: auto; margin: 24px 0 0; overflow: visible; }
+  .rich-editor { height: 620px; min-height: 460px; flex: none; }
   .progression { grid-template-columns: repeat(4, 1fr); }
   .bar:nth-child(4n) { border-right: 0; }
 }
