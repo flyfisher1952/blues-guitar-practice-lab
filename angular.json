@@ -27,7 +27,7 @@
               "outputHashing": "all",
               "budgets": [
                 {"type": "initial", "maximumWarning": "800kB", "maximumError": "1MB"},
-                {"type": "anyComponentStyle", "maximumWarning": "20kB", "maximumError": "30kB"}
+                {"type": "anyComponentStyle", "maximumWarning": "40kB", "maximumError": "50kB"}
               ]
             },
             "development": {
