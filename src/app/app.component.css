@@ -54,6 +54,8 @@ main { min-height: calc(100vh - 176px); }
 .session-heading { margin-bottom: 14px; }
 .session-heading h1 { font-size: clamp(1.9rem, 3vw, 3rem); }
 .session-monitor-button { min-height: 38px; padding: 0 15px; border: 1px solid var(--ink); color: white; background: var(--red); font-weight: 700; cursor: pointer; }
+.session-heading-actions { display: flex; align-items: center; gap: 8px; }
+.restore-defaults-button { min-height: 38px; padding: 0 13px; border: 1px solid #8c8073; color: var(--ink); background: transparent; font-weight: 700; cursor: pointer; }
 .session-summary-bar { margin-bottom: 12px; display: grid; grid-template-columns: 1.25fr repeat(3, 1fr); border: 1px solid var(--line); background: #e5d9c7; }
 .session-summary-bar > * { min-height: 64px; padding: 9px 14px; display: flex; flex-direction: column; justify-content: center; gap: 3px; border-right: 1px solid var(--line); }
 .session-summary-bar > *:last-child { border-right: 0; }
@@ -71,7 +73,7 @@ main { min-height: calc(100vh - 176px); }
 .segment-editor-list { display: grid; }
 .segment-editor { min-height: 58px; padding: 7px 9px; display: grid; grid-template-columns: 42px minmax(130px, 1fr) 72px 66px auto 30px; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); }
 .segment-editor:last-child { border-bottom: 0; }
-.segment-editor.disabled { opacity: .5; background: #eee8de; }
+.segment-editor.done { box-shadow: inset 4px 0 0 #2f7d45; }
 .segment-enabled { display: flex; align-items: center; gap: 5px; }
 .segment-enabled input { width: 17px; height: 17px; accent-color: var(--red); }
 .segment-number { color: var(--red); font-weight: 800; }
@@ -114,26 +116,26 @@ main { min-height: calc(100vh - 176px); }
 .session-monitor > footer { padding: 10px 12px; display: flex; justify-content: flex-end; color: inherit; background: #e7dccb; border-top: 1px solid var(--line); font-size: inherit; letter-spacing: normal; }
 .reset-session { min-height: 34px; padding: 0 12px; border: 1px solid var(--red); color: var(--red); background: transparent; font-weight: 700; cursor: pointer; }
 
-.add-segment-button { width: 34px; min-height: 34px; padding: 0 !important; color: white; border-color: var(--red) !important; background: var(--red) !important; border-radius: 50%; font-size: 1.15rem; line-height: 1; }
-.timer-icon-controls { gap: 3px; }
-.timer-icon-controls button {
-  width: 29px;
-  min-height: 29px;
+.icon-only-button {
   padding: 0;
   display: grid;
   place-items: center;
-  border: 1px solid transparent;
-  color: white;
-  font-size: .72rem;
-  line-height: 1;
+  border: 0 !important;
+  background: transparent !important;
   cursor: pointer;
 }
-.timer-icon-controls .timer-start { background: #2f7d45; border-color: #246538; }
-.timer-icon-controls .timer-pause { background: #c27a1a; border-color: #9e6213; }
-.timer-icon-controls .timer-stop { background: #9d2d24; border-color: #7e241d; }
-.timer-icon-controls .timer-clear { color: #332d27; background: #d7caba; border-color: #9b8e80; }
-.timer-icon-controls button:disabled { opacity: .3; cursor: not-allowed; filter: grayscale(.35); }
-.segment-remove { font-size: .9rem; filter: grayscale(1); }
+.icon-only-button svg { width: 20px; height: 20px; display: block; }
+.icon-only-button:hover:not(:disabled) { background: rgba(23, 19, 15, .08) !important; border-radius: 50%; }
+.add-segment-button { width: 34px; min-height: 34px; }
+.add-segment-button svg { width: 25px; height: 25px; fill: var(--red); }
+.timer-icon-controls { gap: 4px; }
+.timer-icon-controls button { width: 29px; min-height: 29px; }
+.timer-icon-controls .timer-start svg { fill: #23733b; }
+.timer-icon-controls .timer-pause svg { fill: #c27312; }
+.timer-icon-controls .timer-stop svg { fill: #9d2d24; }
+.timer-icon-controls .timer-clear svg { fill: #554b42; }
+.timer-icon-controls button:disabled { opacity: .25; cursor: not-allowed; filter: grayscale(.55); }
+.segment-remove svg { width: 18px; height: 18px; fill: #766d62; }
 .add-segment-backdrop { padding: 24px; position: fixed; inset: 0; z-index: 110; display: grid; place-items: center; background: rgba(23, 19, 15, .55); }
 .add-segment-dialog { width: min(460px, 100%); color: var(--ink); background: #fffdf8; border: 1px solid #5f564c; box-shadow: 0 20px 60px rgba(23, 19, 15, .4); }
 .add-segment-dialog > header { padding: 16px 18px 13px; display: flex; align-items: start; justify-content: space-between; background: #e7dccb; border-bottom: 1px solid var(--line); }
