@@ -33,11 +33,11 @@
 
   @if (activeTab() === 'triads') {
     <app-triad-shapes
-      [selectedKey]="selectedKey()"
+      [selectedKey]="triadSelectedKey()"
       [keys]="keys"
       [chordMode]="chordMode()"
       [triadShapes]="triadShapes()"
-      (selectedKeyChange)="changeKey($event)"
+      (selectedKeyChange)="changeTriadKey($event)"
       (chordModeChange)="setChordMode($event)" />
   }
 
@@ -47,6 +47,7 @@
       [groove]="groove()"
       [grooveStyle]="grooveStyle()"
       [tempo]="tempo()"
+      (selectedKeyChange)="changeLoopKey($event)"
       (grooveStyleChange)="setGroove($event)"
       (tempoChange)="changeTempo($event)" />
   }
