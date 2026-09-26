@@ -170,10 +170,15 @@ main { min-height: calc(100vh - 196px); }
 .editor-toolbar select { min-height: 36px; max-width: 145px; padding: 0 7px; border: 1px solid #8c8073; background: var(--paper); }
 .text-color { min-height: 36px; padding: 0 7px; display: flex; align-items: center; gap: 6px; border: 1px solid #8c8073; background: var(--paper); font-size: .72rem; }
 .text-color input { width: 28px; height: 26px; padding: 1px; border: 0; background: transparent; cursor: pointer; }
-.image-size-control { padding: 8px 10px; display: grid; grid-template-columns: auto 1fr 92px; align-items: center; gap: 10px; color: #786e63; border: 1px solid #8c8073; border-bottom: 0; background: #ddd1bf; font-size: .75rem; }
+.image-size-control { padding: 8px 10px; display: grid; grid-template-columns: auto minmax(180px, 1fr) 82px; align-items: center; gap: 12px; color: #786e63; border: 1px solid #8c8073; border-bottom: 0; background: #ddd1bf; font-size: .75rem; }
 .image-size-control.enabled { color: var(--ink); }
-.image-size-control input { width: 100%; accent-color: var(--red); }
-.image-size-control span { text-align: right; }
+.image-size-slider { min-width: 0; display: grid; gap: 2px; }
+.image-size-slider > input { width: 100%; margin: 0; accent-color: var(--red); }
+.image-size-scale { display: flex; justify-content: space-between; color: #655b51; font-size: .58rem; line-height: 1; }
+.image-size-scale span { min-width: 0; text-align: center; }
+.manual-image-size { display: flex; align-items: center; gap: 4px; }
+.manual-image-size input { width: 60px; min-height: 32px; padding: 3px 5px; border: 1px solid #8c8073; background: #fffdf8; text-align: right; }
+.manual-image-size span { text-align: left; }
 .rich-editor { min-height: 0; flex: 1 1 auto; padding: 24px; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; color: var(--ink); background: #fffdf8; border: 1px solid #8c8073; font-weight: 400; line-height: 1.1; }
 .rich-editor p { margin: 0; }
 .rich-editor:focus { outline: 3px solid var(--amber); outline-offset: 2px; }
@@ -256,6 +261,6 @@ footer { padding: 24px clamp(20px, 5vw, 72px); display: flex; justify-content: s
   .editor-file-actions { margin-top: 12px; justify-content: flex-start; }
   .editor-toolbar select { max-width: none; flex: 1 1 120px; }
   .image-size-control { grid-template-columns: 1fr; }
-  .image-size-control span { text-align: left; }
+  .manual-image-size span { text-align: left; }
   footer { flex-direction: column; gap: 8px; }
 }
