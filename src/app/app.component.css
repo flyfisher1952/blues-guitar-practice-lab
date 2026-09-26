@@ -170,13 +170,13 @@ main { min-height: calc(100vh - 196px); }
 .image-size-control.enabled { color: var(--ink); }
 .image-size-control input { width: 100%; accent-color: var(--red); }
 .image-size-control span { text-align: right; }
-.rich-editor { height: calc(100vh - 365px); min-height: 460px; padding: 24px; overflow: auto; color: var(--ink); background: #fffdf8; border: 1px solid #8c8073; line-height: 1.3; }
-.rich-editor p { margin: .3em 0; }
+.rich-editor { height: calc(100vh - 365px); min-height: 460px; padding: 24px; overflow: auto; color: var(--ink); background: #fffdf8; border: 1px solid #8c8073; font-weight: 400; line-height: 1.1; }
+.rich-editor p { margin: 0; }
 .rich-editor:focus { outline: 3px solid var(--amber); outline-offset: 2px; }
 .rich-editor h2, .rich-editor h3 { font-family: "Newsreader", serif; }
-.rich-editor .resizable-image { width: 320px; min-width: 120px; max-width: 100%; max-height: 620px; margin: 8px; display: inline-block; overflow: hidden; resize: both; vertical-align: top; border: 2px solid transparent; }
+.rich-editor .resizable-image { width: 100px; min-width: 40px; max-width: 100%; margin: 2px; display: inline-block; overflow: auto; resize: horizontal; vertical-align: top; border: 2px solid transparent; }
 .rich-editor .resizable-image:hover, .rich-editor .resizable-image:focus-within { border-color: var(--amber); }
-.rich-editor .resizable-image img { width: 100%; height: 100%; max-height: 600px; display: block; object-fit: contain; }
+.rich-editor .resizable-image img { width: 100%; height: auto; display: block; object-fit: contain; }
 
 .groove-panel { background: #d8ccba; }
 .tempo { display: flex; align-items: center; gap: 12px; }
