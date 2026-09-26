@@ -14,14 +14,6 @@
       </button>
     }
   </div>
-  <label class="key-select">
-    <span>KEY</span>
-    <select [ngModel]="selectedKey()" (ngModelChange)="changeKey($event)" aria-label="Practice key">
-      @for (option of keys; track option.label) {
-        <option [value]="option.label">{{ option.label }} major</option>
-      }
-    </select>
-  </label>
 </nav>
 
 <main>
@@ -42,8 +34,10 @@
   @if (activeTab() === 'triads') {
     <app-triad-shapes
       [selectedKey]="selectedKey()"
+      [keys]="keys"
       [chordMode]="chordMode()"
       [triadShapes]="triadShapes()"
+      (selectedKeyChange)="changeKey($event)"
       (chordModeChange)="setChordMode($event)" />
   }
 
