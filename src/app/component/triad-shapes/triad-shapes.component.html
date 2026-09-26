@@ -7,7 +7,17 @@
     <div class="triad-library">
       <div class="panel-heading triad-heading">
         <div><p class="eyebrow amber">I–IV–V TRIAD LIBRARY</p><h1>{{ selectedKey }} triad shapes</h1></div>
-        <p class="orientation">Player’s view: nut at the top, guitar body below. Strings run vertically from low E (6) to high E (1).</p>
+        <label class="triad-key-select">
+          <span>KEY</span>
+          <select
+            [value]="selectedKey"
+            aria-label="Triad key"
+            (change)="selectedKeyChange.emit($any($event.target).value)">
+            @for (option of keys; track option.label) {
+              <option [value]="option.label">{{ option.label }} major</option>
+            }
+          </select>
+        </label>
       </div>
 
       <div class="mode-picker" role="group" aria-label="Chord type">
