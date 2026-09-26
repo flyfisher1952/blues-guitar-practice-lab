@@ -331,7 +331,8 @@ main { min-height: calc(100vh - 176px); }
 .groove-panel .panel-heading h1 { font-size: clamp(1.9rem, 3vw, 3rem); }
 .loop-toolbar {
   margin-bottom: 10px;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
   border: 1px solid rgba(23, 19, 15, .25);
   background: rgba(243, 236, 223, .38);
@@ -341,12 +342,10 @@ main { min-height: calc(100vh - 176px); }
   padding: 8px 14px;
   display: flex;
   align-items: center;
-  gap: 9px;
+  justify-content: center;
+  gap: 7px;
 }
 .loop-control-group + .loop-control-group { border-left: 1px solid rgba(23, 19, 15, .22); }
-.loop-style-control { flex: 1 1 auto; }
-.loop-harmony-control { flex: 0 1 auto; }
-.loop-tempo-control { flex: 0 1 auto; }
 .loop-control-label, .groove-key-select > span {
   color: var(--muted);
   font-size: .64rem;
@@ -357,7 +356,7 @@ main { min-height: calc(100vh - 176px); }
 .groove-tabs { display: flex; gap: 5px; margin: 0; }
 .groove-tabs button, .loop-mode-buttons button {
   min-height: 32px;
-  padding: 0 11px;
+  padding: 0 7px;
   border: 1px solid rgba(23, 19, 15, .28);
   color: var(--ink);
   background: transparent;
@@ -432,9 +431,8 @@ footer { padding: 24px clamp(20px, 5vw, 72px); display: flex; justify-content: s
   .session-card:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
   .timer-panel, .beat-player { grid-template-columns: 1fr; }
   .timer-panel p { text-align: left; }
-  .loop-toolbar { flex-wrap: wrap; }
-  .loop-control-group { flex: 1 1 auto; }
-  .loop-tempo-control { border-top: 1px solid rgba(23, 19, 15, .22); border-left: 0; }
+  .loop-toolbar { grid-template-columns: 1fr; }
+  .loop-control-group + .loop-control-group { border-top: 1px solid rgba(23, 19, 15, .22); border-left: 0; }
   .transport { display: grid; grid-template-columns: repeat(4, 1fr); }
 }
 
