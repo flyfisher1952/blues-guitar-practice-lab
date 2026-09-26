@@ -153,8 +153,28 @@ main { min-height: calc(100vh - 176px); }
   cursor: col-resize;
   touch-action: none;
 }
-.workspace-divider span { width: 3px; height: 100%; margin: 0 auto; display: block; background: #b8aa98; transition: width .15s, background .15s; }
+.workspace-divider span { width: 3px; height: 100%; margin: 0 auto; position: relative; display: block; background: #b8aa98; transition: width .15s, background .15s; }
+.workspace-divider span::after {
+  content: "•••";
+  width: 18px;
+  padding: 7px 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  color: white;
+  background: #766d62;
+  border: 2px solid var(--paper);
+  border-radius: 10px;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 1px;
+  text-align: center;
+  writing-mode: vertical-rl;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 6px rgba(23, 19, 15, .25);
+}
 .workspace-divider:hover span, .workspace-divider:focus-visible span, .triad-workspace.resizing .workspace-divider span { width: 5px; background: var(--red); }
+.workspace-divider:hover span::after, .workspace-divider:focus-visible span::after, .triad-workspace.resizing .workspace-divider span::after { background: var(--red); }
 .workspace-divider:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
 
 .notes-workspace { height: 100%; min-width: 0; margin-left: clamp(10px, 1.5vw, 20px); padding: 14px; display: flex; flex-direction: column; overflow: hidden; color: var(--ink); background: #e7dccb; border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(23, 19, 15, .15); }
@@ -162,6 +182,46 @@ main { min-height: calc(100vh - 176px); }
 .editor-heading h2 { margin: 0 0 8px; font: 1.8rem/1 "Newsreader", serif; }
 .current-document-name { margin: -2px 0 8px; color: var(--muted); font-size: .75rem; }
 .visually-hidden { width: 1px; height: 1px; position: absolute; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+
+.settings-backdrop {
+  padding: 24px;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: rgba(23, 19, 15, .55);
+}
+.settings-dialog {
+  width: min(520px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  color: var(--ink);
+  background: #fffdf8;
+  border: 1px solid #6f655b;
+  box-shadow: 0 20px 60px rgba(23, 19, 15, .38);
+}
+.settings-dialog > header {
+  padding: 18px 20px 14px;
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid var(--line);
+  background: #e7dccb;
+}
+.settings-dialog h2 { margin: 0; font: 1.8rem/1 "Newsreader", serif; }
+.settings-close { width: 36px; min-height: 36px; border: 0; color: var(--ink); background: transparent; font-size: 1.7rem; line-height: 1; cursor: pointer; }
+.settings-fields { padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.settings-fields > label { display: grid; gap: 6px; color: #61584f; font-size: .75rem; font-weight: 700; }
+.settings-fields select, .settings-fields input[type="number"] { width: 100%; min-height: 40px; padding: 0 9px; border: 1px solid #8c8073; color: var(--ink); background: white; }
+.settings-number { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 7px; }
+.settings-checkbox { grid-column: 1 / -1; grid-template-columns: auto 1fr; align-items: center; }
+.settings-checkbox input { width: 18px; height: 18px; accent-color: var(--red); }
+.settings-file-actions { padding: 14px 20px; display: flex; gap: 8px; border-top: 1px solid var(--line); background: #f3ecdf; }
+.settings-file-actions button, .settings-dialog > footer button { min-height: 38px; padding: 0 14px; border: 1px solid #8c8073; color: var(--ink); background: #fffdf8; cursor: pointer; }
+.settings-dialog > footer { padding: 14px 20px; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--line); }
+.settings-dialog > footer button.primary { color: white; border-color: var(--red); background: var(--red); }
 
 .document-menu-bar {
   min-height: 38px;
@@ -346,5 +406,8 @@ footer { padding: 24px clamp(20px, 5vw, 72px); display: flex; justify-content: s
   .menu-dropdown, .editor-submenu { min-width: 190px; }
   .image-size-control { grid-template-columns: 1fr; }
   .manual-image-size span { text-align: left; }
+  .settings-fields { grid-template-columns: 1fr; }
+  .settings-checkbox { grid-column: 1; }
+  .settings-file-actions { flex-direction: column; }
   footer { flex-direction: column; gap: 8px; }
 }
