@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
 import { asBlob } from 'html-docx-js-typescript';
 import { ChordMode, TriadGroup, TriadShape } from '../../model/models';
 
@@ -31,9 +31,19 @@ export class TriadShapesComponent {
   selectedImageWidth = 100;
   libraryWidth = 52;
   resizing = false;
+  openMenu?: 'file' | 'edit';
   readonly stringNumbers = [6, 5, 4, 3, 2, 1];
   private savedRange?: Range;
   private imageSequence = 0;
+
+  @HostListener('document:click')
+  closeMenus(): void {
+    this.openMenu = undefined;
+  }
+
+  toggleMenu(menu: 'file' | 'edit'): void {
+    this.openMenu = this.openMenu === menu ? undefined : menu;
+  }
 
   usedStringIndices(shape: TriadShape): number[] {
     return shape.frets
