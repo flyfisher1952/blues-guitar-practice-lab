@@ -22,6 +22,7 @@ export class TriadShapesComponent {
   resizing = false;
   readonly stringNumbers = [6, 5, 4, 3, 2, 1];
   private savedRange?: Range;
+  private imageSequence = 0;
 
   usedStringIndices(shape: TriadShape): number[] {
     return shape.frets
@@ -121,8 +122,14 @@ export class TriadShapesComponent {
   }
 
   resizeSelected(event: Event): void {
+    this.setSelectedImageWidth((event.target as HTMLInputElement).value);
+  }
+
+  setSelectedImageWidth(value: number | string): void {
     if (!this.selectedImage) return;
-    this.selectedImageWidth = Number((event.target as HTMLInputElement).value);
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) return;
+    this.selectedImageWidth = Math.round(Math.max(40, Math.min(680, parsed)));
     this.selectedImage.style.width = `${this.selectedImageWidth}px`;
   }
 
@@ -229,7 +236,13 @@ h1, h2, h3 { font-family: Georgia, serif; }
 
   private insertImage(source: string, alt: string, width: number): void {
     const safeAlt = alt.replace(/[&<>"']/g, '');
-    this.insertHtml(`<span class="resizable-image" contenteditable="false" style="width:${width}px"><img src="${source}" alt="${safeAlt}"></span>&#8203;`);
+    const imageId = `editor-image-${++this.imageSequence}`;
+    this.insertHtml(`<span class="resizable-image" data-editor-image-id="${imageId}" contenteditable="false" style="width:${width}px"><img src="${source}" alt="${safeAlt}"></span>&#8203;`);
+    const inserted = this.editor?.nativeElement.querySelector(`[data-editor-image-id="${imageId}"]`) as HTMLElement | null;
+    if (inserted) {
+      this.selectedImage = inserted;
+      this.selectedImageWidth = width;
+    }
   }
 
   private insertHtml(html: string): void {
