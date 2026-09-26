@@ -1,6 +1,6 @@
 <section class="panel groove-panel" role="tabpanel">
   <div class="panel-heading">
-    <div><p class="eyebrow">BUILD THE LOOP</p><h1>Twelve bars in {{ selectedKey.label }}</h1></div>
+    <div><p class="eyebrow">BUILD THE LOOP</p><h1>Twelve bars in {{ selectedKey.label }} {{ mode }}</h1></div>
     <div class="loop-controls">
       <label class="groove-key-select">
         <span>KEY</span>
@@ -9,12 +9,19 @@
           aria-label="Loop key"
           (change)="selectedKeyChange.emit($any($event.target).value)">
           @for (option of keys; track option.label) {
-            <option [value]="option.label" [selected]="option.label === selectedKey.label">{{ option.label }} major</option>
+            <option [value]="option.label" [selected]="option.label === selectedKey.label">{{ option.label }}</option>
           }
         </select>
       </label>
       <label class="tempo"><span>Tempo</span><input type="range" min="55" max="110" [value]="tempo" (input)="tempoChange.emit(+$any($event.target).value)"><strong>{{ tempo }} BPM</strong></label>
     </div>
+  </div>
+
+  <div class="mode-picker loop-mode-picker" role="group" aria-label="Blues key type">
+    <span>BLUES TYPE</span>
+    <button type="button" [class.active]="mode === 'major'" (click)="modeChange.emit('major')">Major</button>
+    <button type="button" [class.active]="mode === 'minor'" (click)="modeChange.emit('minor')">Minor</button>
+    <small>{{ mode === 'major' ? 'Dominant 7th I–IV–V chords' : 'Minor 7th i–iv with a dominant V' }}</small>
   </div>
 
   <div class="groove-tabs" role="tablist" aria-label="Groove style">
