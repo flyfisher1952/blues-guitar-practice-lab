@@ -6,7 +6,7 @@ interface PracticeSegment {
   id: string;
   name: string;
   description: string;
-  enabled: boolean;
+  done: boolean;
   plannedMinutes: number;
   elapsedSeconds: number;
 }
@@ -48,12 +48,8 @@ export class SessionComponent implements OnInit, OnDestroy {
     this.stopClock();
   }
 
-  get enabledSegments(): PracticeSegment[] {
-    return this.segments.filter(segment => segment.enabled);
-  }
-
   get plannedMinutes(): number {
-    return this.enabledSegments.reduce((sum, segment) => sum + segment.plannedMinutes, 0);
+    return this.segments.reduce((sum, segment) => sum + segment.plannedMinutes, 0);
   }
 
   get remainingMinutes(): number {
@@ -102,10 +98,8 @@ export class SessionComponent implements OnInit, OnDestroy {
     this.persistPlan();
   }
 
-  toggleSegment(segment: PracticeSegment, enabled: boolean): void {
-    segment.enabled = enabled;
-    if (!enabled && this.activeSegmentId === segment.id) this.stopSegment(segment);
-    this.syncTotalDuration();
+  toggleDone(segment: PracticeSegment, done: boolean): void {
+    segment.done = done;
     this.persistPlan();
   }
 
@@ -127,7 +121,7 @@ export class SessionComponent implements OnInit, OnDestroy {
       id: crypto.randomUUID?.() ?? `segment-${Date.now()}`,
       name,
       description: this.newSegmentHint.trim(),
-      enabled: true,
+      done: false,
       plannedMinutes: this.clamp(this.newSegmentMinutes, 1, 240, 5),
       elapsedSeconds: 0
     });
@@ -152,7 +146,6 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   startSegment(segment: PracticeSegment): void {
-    if (!segment.enabled) return;
     this.stopClock(true);
     this.activeSegmentId = segment.id;
     this.timerRunning = true;
@@ -179,7 +172,22 @@ export class SessionComponent implements OnInit, OnDestroy {
 
   resetSession(): void {
     this.stopClock();
-    this.segments.forEach(segment => segment.elapsedSeconds = 0);
+    this.segments.forEach(segment => {
+      segment.elapsedSeconds = 0;
+      segment.done = false;
+    });
+    this.persistPlan();
+  }
+
+  restoreDefaults(): void {
+    const confirmed = window.confirm(
+      'Restore the default 20-minute session plan? Current timers and checkmarks will reset. Practice history will be kept.'
+    );
+    if (!confirmed) return;
+    this.stopClock();
+    localStorage.removeItem(this.planKey);
+    this.loadDefaultSegments();
+    this.persistPlan();
   }
 
   clearHistory(): void {
@@ -242,6 +250,7 @@ export class SessionComponent implements OnInit, OnDestroy {
         this.totalMinutes = this.clamp(saved.totalMinutes ?? 20, 1, 480, 20);
         this.segments = saved.segments.map(segment => ({
           ...segment,
+          done: Boolean(segment.done),
           elapsedSeconds: 0,
           plannedMinutes: this.clamp(segment.plannedMinutes, 1, 240, 5)
         }));
@@ -252,15 +261,7 @@ export class SessionComponent implements OnInit, OnDestroy {
       localStorage.removeItem(this.planKey);
     }
 
-    this.segments = this.blocks.map((block, index) => ({
-      id: `default-${index}`,
-      name: block.title,
-      description: block.description,
-      enabled: true,
-      plannedMinutes: 5,
-      elapsedSeconds: 0
-    }));
-    this.syncTotalDuration();
+    this.loadDefaultSegments();
   }
 
   private restoreHistory(): void {
@@ -271,6 +272,18 @@ export class SessionComponent implements OnInit, OnDestroy {
       this.history = [];
       localStorage.removeItem(this.historyKey);
     }
+  }
+
+  private loadDefaultSegments(): void {
+    this.segments = this.blocks.map((block, index) => ({
+      id: `default-${index}`,
+      name: block.title,
+      description: block.description,
+      done: false,
+      plannedMinutes: 5,
+      elapsedSeconds: 0
+    }));
+    this.totalMinutes = 20;
   }
 
   private persistPlan(): void {
