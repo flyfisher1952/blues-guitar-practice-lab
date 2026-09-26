@@ -145,6 +145,7 @@ export class AppComponent {
             loadLastDocument: this.settingsLoadLastDocument
         };
         localStorage.setItem("practiceEditorPreferences", JSON.stringify(preferences));
+        if (!preferences.loadLastDocument) localStorage.removeItem("practiceEditorLastDocument");
         window.dispatchEvent(new CustomEvent("practice-settings-updated"));
         this.settingsOpen = false;
     }
