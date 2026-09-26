@@ -97,11 +97,16 @@
 
     <aside class="notes-workspace" aria-label="Practice notes editor">
       <div class="editor-heading">
-        <div><p class="eyebrow">PRACTICE DOCUMENT</p><h2>Create a Practice Doc</h2></div>
+        <div>
+          <p class="eyebrow">PRACTICE DOCUMENT</p>
+          <h2>Create a Practice Doc</h2>
+          <p class="current-document-name">{{ currentDocumentName }}</p>
+        </div>
       </div>
 
       <div class="document-menu-bar" role="menubar" aria-label="Practice document menu" (click)="$event.stopPropagation()">
         <input #fileInput class="visually-hidden" type="file" accept=".html,.htm,.txt,text/html,text/plain" (change)="loadEditorFile($event)">
+        <input #settingsInput class="visually-hidden" type="file" accept=".json,application/json" (change)="loadSettingsFile($event)">
 
         <div class="document-menu" (mouseenter)="activateMenu('file')">
           <button
@@ -116,6 +121,9 @@
               <button type="button" role="menuitem" (click)="chooseEditorFile(); closeMenus()">Load…</button>
               <button type="button" role="menuitem" (click)="saveHtml(); closeMenus()">Save…</button>
               <button type="button" role="menuitem" (click)="saveDocx(); closeMenus()">Save as Word document…</button>
+              <div class="menu-separator" role="separator"></div>
+              <button type="button" role="menuitem" (click)="saveSettings(); closeMenus()">Save settings…</button>
+              <button type="button" role="menuitem" (click)="chooseSettingsFile(); closeMenus()">Load settings…</button>
               <div class="menu-separator" role="separator"></div>
               <button type="button" role="menuitem" (click)="printEditor(); closeMenus()">Print…</button>
               <button type="button" role="menuitem" (click)="clearEditor(); closeMenus()">Clear document</button>
