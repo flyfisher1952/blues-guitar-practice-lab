@@ -1,7 +1,20 @@
 <section class="panel groove-panel" role="tabpanel">
   <div class="panel-heading">
     <div><p class="eyebrow">BUILD THE LOOP</p><h1>Twelve bars in {{ selectedKey.label }}</h1></div>
-    <label class="tempo"><span>Tempo</span><input type="range" min="55" max="110" [value]="tempo" (input)="tempoChange.emit(+$any($event.target).value)"><strong>{{ tempo }} BPM</strong></label>
+    <div class="loop-controls">
+      <label class="groove-key-select">
+        <span>KEY</span>
+        <select
+          [value]="selectedKey.label"
+          aria-label="Loop key"
+          (change)="selectedKeyChange.emit($any($event.target).value)">
+          @for (option of keys; track option.label) {
+            <option [value]="option.label" [selected]="option.label === selectedKey.label">{{ option.label }} major</option>
+          }
+        </select>
+      </label>
+      <label class="tempo"><span>Tempo</span><input type="range" min="55" max="110" [value]="tempo" (input)="tempoChange.emit(+$any($event.target).value)"><strong>{{ tempo }} BPM</strong></label>
+    </div>
   </div>
 
   <div class="groove-tabs" role="tablist" aria-label="Groove style">
