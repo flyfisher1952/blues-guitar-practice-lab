@@ -1,5 +1,9 @@
-<section class="panel dark-panel triad-panel" role="tabpanel">
-  <div class="triad-workspace">
+<section class="panel triad-panel" role="tabpanel">
+  <div
+    #workspace
+    class="triad-workspace"
+    [class.resizing]="resizing"
+    [style.--library-width]="libraryWidth + '%'">
     <div class="triad-library">
       <div class="panel-heading triad-heading">
         <div><p class="eyebrow amber">I–IV–V TRIAD LIBRARY</p><h1>{{ selectedKey }} triad shapes</h1></div>
@@ -49,7 +53,7 @@
                       @for (stringIndex of usedStringIndices(shape); track stringIndex; let displayIndex = $index) {
                         @if (shape.frets[stringIndex] === fret) {
                           <circle [attr.cx]="stringX(displayIndex)" [attr.cy]="fretY(fretIndex)" r="10" class="svg-note" [class.root-note]="shape.roots[stringIndex]"/>
-                          <text [attr.x]="stringX(displayIndex)" [attr.y]="fretY(fretIndex) + 3.5" text-anchor="middle" class="svg-note-name" [class.root-note-name]="shape.roots[stringIndex]">{{ shape.notes[stringIndex] }}</text>
+                          <text [attr.x]="stringX(displayIndex)" [attr.y]="fretY(fretIndex) + 3.5" text-anchor="middle" class="svg-note-name">{{ shape.notes[stringIndex] }}</text>
                         }
                       }
                     }
@@ -64,29 +68,77 @@
       <div class="diagram-key"><strong>Reading the diagrams:</strong> Fret numbers are shown on the left, and only frets containing notes appear. Hollow gold circles are roots. The diagrams cover strings 6 through 1 in root position, first inversion, and second inversion.</div>
     </div>
 
+    <div
+      class="workspace-divider"
+      role="separator"
+      tabindex="0"
+      aria-label="Resize triad library and practice page"
+      aria-orientation="vertical"
+      [attr.aria-valuenow]="libraryWidth"
+      aria-valuemin="30"
+      aria-valuemax="70"
+      (pointerdown)="startResize($event)"
+      (pointermove)="resizeWorkspace($event)"
+      (pointerup)="stopResize($event)"
+      (pointercancel)="stopResize($event)"
+      (keydown)="resizeWithKeyboard($event)">
+      <span aria-hidden="true"></span>
+    </div>
+
     <aside class="notes-workspace" aria-label="Practice notes editor">
       <div class="editor-heading">
         <div><p class="eyebrow">PRACTICE PAGE</p><h2>Arrange your shapes</h2></div>
-        <button type="button" class="clear-editor" (click)="clearEditor()">Clear</button>
+        <div class="editor-file-actions">
+          <input #fileInput class="visually-hidden" type="file" accept=".html,.htm,.txt,text/html,text/plain" (change)="loadEditorFile($event)">
+          <button type="button" (click)="chooseEditorFile()">Load</button>
+          <button type="button" (click)="saveEditor()">Save</button>
+          <button type="button" (click)="printEditor()">Print</button>
+          <button type="button" class="clear-editor" (click)="clearEditor()">Clear</button>
+        </div>
       </div>
-      <p class="editor-help">Type notes here, drop in your own images, or drag a triad diagram from the left.</p>
+      <p class="editor-help">Type and format notes, drop in your own images, or drag a triad diagram from the library.</p>
+
       <div class="editor-toolbar" role="toolbar" aria-label="Text formatting">
-        <button type="button" title="Bold" aria-label="Bold" (click)="format('bold')"><b>B</b></button>
-        <button type="button" title="Italic" aria-label="Italic" (click)="format('italic')"><i>I</i></button>
-        <button type="button" title="Underline" aria-label="Underline" (click)="format('underline')"><u>U</u></button>
-        <button type="button" title="Bulleted list" aria-label="Bulleted list" (click)="format('insertUnorderedList')">• List</button>
-        <button type="button" title="Numbered list" aria-label="Numbered list" (click)="format('insertOrderedList')">1. List</button>
-        <select aria-label="Text style" (change)="format('formatBlock', $any($event.target).value)">
+        <button type="button" title="Bold" aria-label="Bold" (mousedown)="$event.preventDefault()" (click)="format('bold')"><b>B</b></button>
+        <button type="button" title="Italic" aria-label="Italic" (mousedown)="$event.preventDefault()" (click)="format('italic')"><i>I</i></button>
+        <button type="button" title="Underline" aria-label="Underline" (mousedown)="$event.preventDefault()" (click)="format('underline')"><u>U</u></button>
+        <button type="button" title="Align left" aria-label="Align left" (mousedown)="$event.preventDefault()" (click)="format('justifyLeft')">⇤</button>
+        <button type="button" title="Center" aria-label="Center" (mousedown)="$event.preventDefault()" (click)="format('justifyCenter')">↔</button>
+        <button type="button" title="Align right" aria-label="Align right" (mousedown)="$event.preventDefault()" (click)="format('justifyRight')">⇥</button>
+        <button type="button" title="Bulleted list" aria-label="Bulleted list" (mousedown)="$event.preventDefault()" (click)="format('insertUnorderedList')">• List</button>
+        <button type="button" title="Numbered list" aria-label="Numbered list" (mousedown)="$event.preventDefault()" (click)="format('insertOrderedList')">1. List</button>
+
+        <select aria-label="Text style" title="Text style" (change)="format('formatBlock', $any($event.target).value)">
           <option value="p">Paragraph</option>
           <option value="h2">Heading</option>
           <option value="h3">Subheading</option>
         </select>
+        <select aria-label="Font family" title="Font family" (change)="format('fontName', $any($event.target).value)">
+          <option value="Arial">Arial</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Tahoma">Tahoma</option>
+          <option value="Times New Roman">Times New Roman</option>
+          <option value="Verdana">Verdana</option>
+        </select>
+        <select aria-label="Font size" title="Font size" (change)="format('fontSize', $any($event.target).value)">
+          <option value="2">Small</option>
+          <option value="3" selected>Normal</option>
+          <option value="4">Large</option>
+          <option value="5">Larger</option>
+          <option value="6">Largest</option>
+        </select>
+        <label class="text-color" title="Text color">
+          <span>Color</span>
+          <input type="color" value="#17130f" aria-label="Text color" (input)="format('foreColor', $any($event.target).value)">
+        </label>
       </div>
+
       <div class="image-size-control" [class.enabled]="selectedImage">
         <label for="image-size">Selected image size</label>
         <input id="image-size" type="range" min="120" max="680" [value]="selectedImageWidth" [disabled]="!selectedImage" (input)="resizeSelected($event)">
         <span>{{ selectedImage ? selectedImageWidth + ' px' : 'Select an image' }}</span>
       </div>
+
       <div
         #editor
         class="rich-editor"
@@ -96,7 +148,10 @@
         aria-label="Practice notes"
         (dragover)="allowDrop($event)"
         (drop)="dropIntoEditor($event)"
-        (click)="selectEditorImage($event)">
+        (click)="selectEditorImage($event)"
+        (mouseup)="rememberSelection()"
+        (keyup)="rememberSelection()"
+        (input)="rememberSelection()">
         <h2>{{ selectedKey }} practice notes</h2>
         <p>Drag triad diagrams here to build a practice sheet.</p>
       </div>
