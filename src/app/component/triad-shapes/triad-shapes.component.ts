@@ -30,8 +30,8 @@ export class TriadShapesComponent {
   }
 
   stringX(displayIndex: number): number { return 38 + displayIndex * 32; }
-  fretY(index: number): number { return 48 + index * 32; }
-  diagramHeight(_shape: TriadShape): number { return 160; }
+  fretY(index: number): number { return 40 + index * 30; }
+  diagramHeight(_shape: TriadShape): number { return 128; }
   diagramViewBox(shape: TriadShape): string { return `0 0 126 ${this.diagramHeight(shape)}`; }
 
   beginTriadDrag(event: DragEvent, shape: TriadShape): void {
@@ -100,6 +100,13 @@ export class TriadShapesComponent {
     }
   }
 
+  pasteIntoEditor(event: ClipboardEvent): void {
+    event.preventDefault();
+    const text = event.clipboardData?.getData('text/plain') ?? '';
+    const html = this.escapeHtml(text).replace(/\r\n?|\n/g, '<br>');
+    this.insertHtml(html);
+  }
+
   format(command: string, value?: string): void {
     this.restoreSelection();
     document.execCommand(command, false, value);
@@ -139,10 +146,7 @@ export class TriadShapesComponent {
     reader.onload = () => {
       const raw = String(reader.result ?? '');
       if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
-        this.editor!.nativeElement.innerHTML = raw
-          .split(/\r?\n/)
-          .map(line => `<p>${this.escapeHtml(line) || '<br>'}</p>`)
-          .join('');
+        this.editor!.nativeElement.innerHTML = this.escapeHtml(raw).replace(/\r\n?|\n/g, '<br>') || '<br>';
       } else {
         this.editor!.nativeElement.innerHTML = this.sanitizeLoadedHtml(raw);
       }
@@ -264,7 +268,7 @@ h1, h2, h3 { font-family: Georgia, serif; }
     const height = this.diagramHeight(shape);
     const usedStringIndices = this.usedStringIndices(shape);
     const strings = usedStringIndices.map((stringIndex, displayIndex) =>
-      `<text x="${this.stringX(displayIndex)}" y="18" text-anchor="middle" fill="#5f564c" font-size="11" font-weight="700" font-family="Arial">${this.stringNumbers[stringIndex]}</text><line x1="${this.stringX(displayIndex)}" y1="25" x2="${this.stringX(displayIndex)}" y2="${height - 10}" stroke="#8c8073" stroke-width="1.4"/>`
+      `<text x="${this.stringX(displayIndex)}" y="15" text-anchor="middle" fill="#5f564c" font-size="11" font-weight="800" font-family="Arial">${this.stringNumbers[stringIndex]}</text><line x1="${this.stringX(displayIndex)}" y1="22" x2="${this.stringX(displayIndex)}" y2="${height - 10}" stroke="#8c8073" stroke-width="1.4"/>`
     ).join('');
     const rows = shape.usedFrets.map((fret, fretIndex) => {
       const y = this.fretY(fretIndex);
