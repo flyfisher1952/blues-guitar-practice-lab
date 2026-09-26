@@ -33,6 +33,8 @@ export class SessionComponent implements OnInit, OnDestroy {
   newSegmentName = '';
   newSegmentHint = '';
   newSegmentMinutes = 5;
+  newSegmentPosition = 1;
+  draggedSegmentId?: string;
   activeSegmentId?: string;
   timerRunning = false;
   private timer?: number;
@@ -107,6 +109,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     this.newSegmentName = '';
     this.newSegmentHint = '';
     this.newSegmentMinutes = 5;
+    this.newSegmentPosition = this.segments.length + 1;
     this.addSegmentOpen = true;
   }
 
@@ -117,14 +120,16 @@ export class SessionComponent implements OnInit, OnDestroy {
   addSegment(): void {
     const name = this.newSegmentName.trim();
     if (!name) return;
-    this.segments.push({
+    const segment: PracticeSegment = {
       id: crypto.randomUUID?.() ?? `segment-${Date.now()}`,
       name,
       description: this.newSegmentHint.trim(),
       done: false,
       plannedMinutes: this.clamp(this.newSegmentMinutes, 1, 240, 5),
       elapsedSeconds: 0
-    });
+    };
+    const position = this.clamp(this.newSegmentPosition, 1, this.segments.length + 1, this.segments.length + 1);
+    this.segments.splice(position - 1, 0, segment);
     this.syncTotalDuration();
     this.persistPlan();
     this.addSegmentOpen = false;
@@ -135,6 +140,38 @@ export class SessionComponent implements OnInit, OnDestroy {
     this.segments = this.segments.filter(item => item.id !== segment.id);
     this.syncTotalDuration();
     this.persistPlan();
+  }
+
+  beginSegmentDrag(event: DragEvent, segment: PracticeSegment): void {
+    this.draggedSegmentId = segment.id;
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', segment.id);
+    }
+  }
+
+  allowSegmentDrop(event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+  }
+
+  dropSegment(event: DragEvent, target: PracticeSegment): void {
+    event.preventDefault();
+    const sourceId = this.draggedSegmentId ?? event.dataTransfer?.getData('text/plain');
+    const fromIndex = this.segments.findIndex(segment => segment.id === sourceId);
+    const toIndex = this.segments.findIndex(segment => segment.id === target.id);
+    if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) {
+      this.draggedSegmentId = undefined;
+      return;
+    }
+    const [moved] = this.segments.splice(fromIndex, 1);
+    this.segments.splice(toIndex, 0, moved);
+    this.draggedSegmentId = undefined;
+    this.persistPlan();
+  }
+
+  endSegmentDrag(): void {
+    this.draggedSegmentId = undefined;
   }
 
   openMonitor(): void {
