@@ -17,16 +17,24 @@ export class TriadShapesComponent {
   selectedImageWidth = 320;
   readonly stringNumbers = [6, 5, 4, 3, 2, 1];
 
-  stringX(index: number): number { return 46 + index * 32; }
-  fretY(index: number): number { return 58 + index * 38; }
-  diagramHeight(shape: TriadShape): number { return 78 + shape.usedFrets.length * 38; }
-  diagramViewBox(shape: TriadShape): string { return `0 0 246 ${this.diagramHeight(shape)}`; }
+  usedStringIndices(shape: TriadShape): number[] {
+    return shape.frets
+      .map((fret, index) => fret === null ? -1 : index)
+      .filter(index => index >= 0);
+  }
+
+  stringX(displayIndex: number): number { return 38 + displayIndex * 32; }
+  fretY(index: number): number { return 48 + index * 32; }
+  diagramHeight(shape: TriadShape): number { return 64 + shape.usedFrets.length * 32; }
+  diagramViewBox(shape: TriadShape): string { return `0 0 126 ${this.diagramHeight(shape)}`; }
 
   beginTriadDrag(event: DragEvent, shape: TriadShape): void {
     if (!event.dataTransfer) return;
+    window.getSelection()?.removeAllRanges();
     const source = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(this.createSvg(shape))}`;
     event.dataTransfer.effectAllowed = 'copy';
     event.dataTransfer.setData('application/x-triad-image', source);
+    event.dataTransfer.setData('text/uri-list', source);
     event.dataTransfer.setData('text/plain', `${shape.name} — ${shape.stringSet}, ${shape.subtitle}`);
   }
 
@@ -103,18 +111,19 @@ export class TriadShapesComponent {
 
   private createSvg(shape: TriadShape): string {
     const height = this.diagramHeight(shape);
-    const strings = this.stringNumbers.map((number, index) =>
-      `<text x="${this.stringX(index)}" y="22" text-anchor="middle" fill="#d8cec2" font-size="13" font-family="Arial">${number}</text><line x1="${this.stringX(index)}" y1="32" x2="${this.stringX(index)}" y2="${height - 16}" stroke="#71675e" stroke-width="${index === 0 ? 2.2 : 1.2}"/>`
+    const usedStringIndices = this.usedStringIndices(shape);
+    const strings = usedStringIndices.map((stringIndex, displayIndex) =>
+      `<text x="${this.stringX(displayIndex)}" y="18" text-anchor="middle" fill="#d8cec2" font-size="11" font-weight="700" font-family="Arial">${this.stringNumbers[stringIndex]}</text><line x1="${this.stringX(displayIndex)}" y1="25" x2="${this.stringX(displayIndex)}" y2="${height - 10}" stroke="#71675e" stroke-width="1.4"/>`
     ).join('');
     const rows = shape.usedFrets.map((fret, fretIndex) => {
       const y = this.fretY(fretIndex);
-      const notes = shape.frets.map((shapeFret, stringIndex) => {
-        if (shapeFret !== fret) return '';
+      const notes = usedStringIndices.map((stringIndex, displayIndex) => {
+        if (shape.frets[stringIndex] !== fret) return '';
         const isRoot = shape.roots[stringIndex];
-        return `<circle cx="${this.stringX(stringIndex)}" cy="${y}" r="13" fill="${isRoot ? '#17130f' : '#df8e2f'}" stroke="#df8e2f" stroke-width="${isRoot ? 3 : 1}"/><text x="${this.stringX(stringIndex)}" y="${y + 4}" text-anchor="middle" fill="${isRoot ? '#df8e2f' : '#17130f'}" font-size="11" font-weight="700" font-family="Arial">${shape.notes[stringIndex] ?? ''}</text>`;
+        return `<circle cx="${this.stringX(displayIndex)}" cy="${y}" r="10" fill="${isRoot ? '#17130f' : '#df8e2f'}" stroke="#df8e2f" stroke-width="${isRoot ? 2.5 : 1}"/><text x="${this.stringX(displayIndex)}" y="${y + 3.5}" text-anchor="middle" fill="${isRoot ? '#df8e2f' : '#17130f'}" font-size="8.5" font-weight="700" font-family="Arial">${shape.notes[stringIndex] ?? ''}</text>`;
       }).join('');
-      return `<text x="18" y="${y + 5}" text-anchor="middle" fill="#df8e2f" font-size="17" font-weight="700" font-family="Arial">${fret}</text><line x1="34" y1="${y}" x2="218" y2="${y}" stroke="#71675e"/>${notes}`;
+      return `<text x="13" y="${y + 5}" text-anchor="middle" fill="#df8e2f" font-size="16" font-weight="700" font-family="Arial">${fret}</text><line x1="27" y1="${y}" x2="116" y2="${y}" stroke="#71675e"/>${notes}`;
     }).join('');
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="246" height="${height}" viewBox="0 0 246 ${height}"><rect width="100%" height="100%" rx="8" fill="#17130f"/>${strings}${rows}</svg>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="126" height="${height}" viewBox="0 0 126 ${height}"><rect width="100%" height="100%" rx="6" fill="#17130f"/>${strings}${rows}</svg>`;
   }
 }
