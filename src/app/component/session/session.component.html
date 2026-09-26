@@ -80,7 +80,7 @@
           @for (day of recentHistory; track day.date) {
             <div>
               <strong>{{ day.date }}</strong>
-              <span>{{ formatDuration($any(day.segments | keyvalue).reduce($any(sumSeconds), 0)) }}</span>
+              <span>{{ formatDuration(dayTotal(day)) }}</span>
             </div>
           }
         </div>
