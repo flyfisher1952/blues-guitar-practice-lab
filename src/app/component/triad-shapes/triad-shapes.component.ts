@@ -30,8 +30,8 @@ export class TriadShapesComponent {
   }
 
   stringX(displayIndex: number): number { return 38 + displayIndex * 32; }
-  fretY(index: number): number { return 40 + index * 30; }
-  diagramHeight(_shape: TriadShape): number { return 128; }
+  fretY(index: number): number { return 58 + index * 28; }
+  diagramHeight(_shape: TriadShape): number { return 136; }
   diagramViewBox(shape: TriadShape): string { return `0 0 126 ${this.diagramHeight(shape)}`; }
 
   beginTriadDrag(event: DragEvent, shape: TriadShape): void {
@@ -268,8 +268,9 @@ h1, h2, h3 { font-family: Georgia, serif; }
   private createSvg(shape: TriadShape): string {
     const height = this.diagramHeight(shape);
     const usedStringIndices = this.usedStringIndices(shape);
+    const chordName = `<text x="70" y="18" text-anchor="middle" fill="#17130f" font-size="17" font-weight="800" font-family="Arial">${shape.name}</text>`;
     const strings = usedStringIndices.map((stringIndex, displayIndex) =>
-      `<text x="${this.stringX(displayIndex)}" y="15" text-anchor="middle" fill="#5f564c" font-size="11" font-weight="800" font-family="Arial">${this.stringNumbers[stringIndex]}</text><line x1="${this.stringX(displayIndex)}" y1="22" x2="${this.stringX(displayIndex)}" y2="${height - 10}" stroke="#8c8073" stroke-width="1.4"/>`
+      `<text x="${this.stringX(displayIndex)}" y="35" text-anchor="middle" fill="#5f564c" font-size="11" font-weight="800" font-family="Arial">${this.stringNumbers[stringIndex]}</text><line x1="${this.stringX(displayIndex)}" y1="42" x2="${this.stringX(displayIndex)}" y2="${height - 8}" stroke="#8c8073" stroke-width="1.4"/>`
     ).join('');
     const rows = shape.usedFrets.map((fret, fretIndex) => {
       const y = this.fretY(fretIndex);
@@ -280,6 +281,6 @@ h1, h2, h3 { font-family: Georgia, serif; }
       }).join('');
       return `<text x="13" y="${y + 5}" text-anchor="middle" fill="#9d2d24" font-size="16" font-weight="700" font-family="Arial">${fret}</text><line x1="27" y1="${y}" x2="116" y2="${y}" stroke="#8c8073"/>${notes}`;
     }).join('');
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="126" height="${height}" viewBox="0 0 126 ${height}"><rect width="100%" height="100%" rx="6" fill="#fffdf8"/>${strings}${rows}</svg>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="126" height="${height}" viewBox="0 0 126 ${height}"><rect width="100%" height="100%" rx="6" fill="#fffdf8"/>${chordName}${strings}${rows}</svg>`;
   }
 }
