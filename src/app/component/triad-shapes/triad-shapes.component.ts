@@ -3,7 +3,7 @@ import { asBlob } from 'html-docx-js-typescript';
 import { ChordMode, KeyOption, TriadGroup, TriadShape } from '../../model/models';
 
 type WritableFile = { write(data: Blob): Promise<void>; close(): Promise<void> };
-type SaveFileHandle = { createWritable(): Promise<WritableFile> };
+type SaveFileHandle = { name: string; createWritable(): Promise<WritableFile> };
 type SaveFilePickerOptions = {
   suggestedName: string;
   types: Array<{ description: string; accept: Record<string, string[]> }>;
@@ -11,6 +11,14 @@ type SaveFilePickerOptions = {
 type SavePickerWindow = Window & {
   showSaveFilePicker?: (options: SaveFilePickerOptions) => Promise<SaveFileHandle>;
 };
+
+interface PracticeSettings {
+  version: 1;
+  selectedKey: string;
+  chordMode: ChordMode;
+  documentName: string;
+  editorHtml: string;
+}
 
 @Component({
   selector: 'app-triad-shapes',
@@ -20,6 +28,7 @@ type SavePickerWindow = Window & {
 export class TriadShapesComponent {
   @ViewChild('editor') private editor?: ElementRef<HTMLDivElement>;
   @ViewChild('fileInput') private fileInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('settingsInput') private settingsInput?: ElementRef<HTMLInputElement>;
   @ViewChild('workspace') private workspace?: ElementRef<HTMLDivElement>;
 
   @Input({ required: true }) selectedKey = '';
@@ -33,6 +42,7 @@ export class TriadShapesComponent {
   selectedImageWidth = 100;
   libraryWidth = 52;
   resizing = false;
+  currentDocumentName = 'Untitled practice document';
   openMenu?: 'file' | 'edit';
   readonly stringNumbers = [6, 5, 4, 3, 2, 1];
   private savedRange?: Range;
