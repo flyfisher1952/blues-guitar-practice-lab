@@ -20,43 +20,44 @@
             <div><h2>{{ group.name }}</h2><small>Drag any diagram into your notes</small></div>
           </header>
 
-          @for (set of group.sets; track set.label) {
-            <div class="string-set">
-              <h3>{{ set.label }}</h3>
-              <div class="shape-row">
-                @for (shape of set.shapes; track shape.id) {
-                  <article class="mini-triad-card">
-                    <h4>{{ shape.subtitle }}</h4>
-                    <svg
-                      class="triad-diagram"
-                      draggable="true"
-                      role="img"
-                      tabindex="0"
-                      [attr.aria-label]="shape.name + ', ' + shape.stringSet + ', ' + shape.subtitle"
-                      [attr.viewBox]="diagramViewBox(shape)"
-                      [attr.height]="diagramHeight(shape)"
-                      (dragstart)="beginTriadDrag($event, shape)">
-                      <rect width="246" [attr.height]="diagramHeight(shape)" rx="8" class="diagram-background"/>
-                      @for (number of stringNumbers; track number; let stringIndex = $index) {
-                        <text [attr.x]="stringX(stringIndex)" y="22" text-anchor="middle" class="svg-string-number">{{ number }}</text>
-                        <line [attr.x1]="stringX(stringIndex)" y1="32" [attr.x2]="stringX(stringIndex)" [attr.y2]="diagramHeight(shape) - 16" class="svg-string" [class.low-string]="stringIndex === 0"/>
-                      }
-                      @for (fret of shape.usedFrets; track fret; let fretIndex = $index) {
-                        <text x="18" [attr.y]="fretY(fretIndex) + 5" text-anchor="middle" class="svg-fret-number">{{ fret }}</text>
-                        <line x1="34" [attr.y1]="fretY(fretIndex)" x2="218" [attr.y2]="fretY(fretIndex)" class="svg-fret"/>
-                        @for (number of stringNumbers; track number; let stringIndex = $index) {
-                          @if (shape.frets[stringIndex] === fret) {
-                            <circle [attr.cx]="stringX(stringIndex)" [attr.cy]="fretY(fretIndex)" r="13" class="svg-note" [class.root-note]="shape.roots[stringIndex]"/>
-                            <text [attr.x]="stringX(stringIndex)" [attr.y]="fretY(fretIndex) + 4" text-anchor="middle" class="svg-note-name" [class.root-note-name]="shape.roots[stringIndex]">{{ shape.notes[stringIndex] }}</text>
-                          }
+          <div class="shape-grid">
+            @for (set of group.sets; track set.label) {
+              @for (shape of set.shapes; track shape.id) {
+                <article
+                  class="mini-triad-card"
+                  draggable="true"
+                  role="img"
+                  tabindex="0"
+                  [attr.aria-label]="shape.name + ', ' + shape.stringSet + ', ' + shape.subtitle"
+                  (dragstart)="beginTriadDrag($event, shape)">
+                  <span class="string-set-label">{{ set.label }}</span>
+                  <h4>{{ shape.subtitle }}</h4>
+                  <svg
+                    class="triad-diagram"
+                    aria-hidden="true"
+                    focusable="false"
+                    [attr.viewBox]="diagramViewBox(shape)"
+                    [attr.height]="diagramHeight(shape)">
+                    <rect width="126" [attr.height]="diagramHeight(shape)" rx="6" class="diagram-background"/>
+                    @for (stringIndex of usedStringIndices(shape); track stringIndex; let displayIndex = $index) {
+                      <text [attr.x]="stringX(displayIndex)" y="18" text-anchor="middle" class="svg-string-number">{{ stringNumbers[stringIndex] }}</text>
+                      <line [attr.x1]="stringX(displayIndex)" y1="25" [attr.x2]="stringX(displayIndex)" [attr.y2]="diagramHeight(shape) - 10" class="svg-string"/>
+                    }
+                    @for (fret of shape.usedFrets; track fret; let fretIndex = $index) {
+                      <text x="13" [attr.y]="fretY(fretIndex) + 5" text-anchor="middle" class="svg-fret-number">{{ fret }}</text>
+                      <line x1="27" [attr.y1]="fretY(fretIndex)" x2="116" [attr.y2]="fretY(fretIndex)" class="svg-fret"/>
+                      @for (stringIndex of usedStringIndices(shape); track stringIndex; let displayIndex = $index) {
+                        @if (shape.frets[stringIndex] === fret) {
+                          <circle [attr.cx]="stringX(displayIndex)" [attr.cy]="fretY(fretIndex)" r="10" class="svg-note" [class.root-note]="shape.roots[stringIndex]"/>
+                          <text [attr.x]="stringX(displayIndex)" [attr.y]="fretY(fretIndex) + 3.5" text-anchor="middle" class="svg-note-name" [class.root-note-name]="shape.roots[stringIndex]">{{ shape.notes[stringIndex] }}</text>
                         }
                       }
-                    </svg>
-                  </article>
-                }
-              </div>
-            </div>
-          }
+                    }
+                  </svg>
+                </article>
+              }
+            }
+          </div>
         </section>
       }
 
