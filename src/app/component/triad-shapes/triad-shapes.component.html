@@ -91,7 +91,8 @@
         <div class="editor-file-actions">
           <input #fileInput class="visually-hidden" type="file" accept=".html,.htm,.txt,text/html,text/plain" (change)="loadEditorFile($event)">
           <button type="button" (click)="chooseEditorFile()">Load</button>
-          <button type="button" (click)="saveEditor()">Save</button>
+          <button type="button" (click)="saveHtml()">Save HTML</button>
+          <button type="button" (click)="saveDocx()">Save DOCX</button>
           <button type="button" (click)="printEditor()">Print</button>
           <button type="button" class="clear-editor" (click)="clearEditor()">Clear</button>
         </div>
