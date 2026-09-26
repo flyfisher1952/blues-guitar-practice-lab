@@ -14,6 +14,7 @@ export class BuildLoopComponent {
     chordNames: ['', '', ''],
     preferFlats: false
   };
+  @Input({ required: true }) keys: readonly KeyOption[] = [];
   @Input({ required: true }) groove: Groove = {
     bars: [],
     hand: '',
@@ -24,6 +25,7 @@ export class BuildLoopComponent {
   @Input({ required: true }) grooveStyle: GrooveStyle = 'shuffle';
   @Input() tempo = 72;
 
+  @Output() selectedKeyChange = new EventEmitter<string>();
   @Output() grooveStyleChange = new EventEmitter<GrooveStyle>();
   @Output() tempoChange = new EventEmitter<number>();
 
