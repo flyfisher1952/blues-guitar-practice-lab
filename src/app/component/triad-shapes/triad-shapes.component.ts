@@ -45,6 +45,10 @@ export class TriadShapesComponent {
     this.openMenu = this.openMenu === menu ? undefined : menu;
   }
 
+  activateMenu(menu: 'file' | 'edit'): void {
+    if (this.openMenu) this.openMenu = menu;
+  }
+
   usedStringIndices(shape: TriadShape): number[] {
     return shape.frets
       .map((fret, index) => fret === null ? -1 : index)
