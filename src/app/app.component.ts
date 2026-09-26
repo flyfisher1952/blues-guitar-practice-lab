@@ -20,6 +20,16 @@ export class AppComponent {
     private readonly chords = inject(ChordService);
     readonly drums = inject(DrumService);
 
+    readonly displayName = signal(localStorage.getItem("practiceDisplayName") ?? "");
+    settingsOpen = false;
+    settingsDisplayName = "";
+    settingsTriadKey = "G";
+    settingsChordMode: ChordMode = "major";
+    settingsFontFamily = "Arial";
+    settingsFontSize = 16;
+    settingsImageDropSize = 100;
+    settingsLoadLastDocument = false;
+
     readonly tabs: readonly { id: PracticeTab; label: string }[] = [
         { id: "session", label: "Session" },
         { id: "triads", label: "Triad Shapes" },
@@ -98,6 +108,47 @@ export class AppComponent {
         this.activeTab.set(tab);
     }
 
+    openSettings(): void {
+        this.settingsDisplayName = this.displayName();
+        this.settingsTriadKey = this.triadSelectedKey();
+        this.settingsChordMode = this.chordMode();
+        try {
+            const preferences = JSON.parse(localStorage.getItem("practiceEditorPreferences") ?? "{}");
+            this.settingsFontFamily = preferences.defaultFontFamily ?? "Arial";
+            this.settingsFontSize = Number(preferences.defaultFontSize) || 16;
+            this.settingsImageDropSize = Number(preferences.imageDropSize) || 100;
+            this.settingsLoadLastDocument = Boolean(preferences.loadLastDocument);
+        } catch {
+            this.settingsFontFamily = "Arial";
+            this.settingsFontSize = 16;
+            this.settingsImageDropSize = 100;
+            this.settingsLoadLastDocument = false;
+        }
+        this.settingsOpen = true;
+    }
+
+    closeSettings(): void {
+        this.settingsOpen = false;
+    }
+
+    saveSettings(): void {
+        const displayName = this.settingsDisplayName.trim();
+        this.displayName.set(displayName);
+        localStorage.setItem("practiceDisplayName", displayName);
+        this.changeTriadKey(this.settingsTriadKey);
+        this.setChordMode(this.settingsChordMode);
+
+        const preferences = {
+            defaultFontFamily: this.settingsFontFamily,
+            defaultFontSize: this.clamp(this.settingsFontSize, 10, 32, 16),
+            imageDropSize: this.clamp(this.settingsImageDropSize, 40, 680, 100),
+            loadLastDocument: this.settingsLoadLastDocument
+        };
+        localStorage.setItem("practiceEditorPreferences", JSON.stringify(preferences));
+        window.dispatchEvent(new CustomEvent("practice-settings-updated"));
+        this.settingsOpen = false;
+    }
+
     changeTriadKey(label: string): void {
         this.triadSelectedKey.set(label);
         localStorage.setItem("labTriadKey", label);
@@ -165,6 +216,11 @@ export class AppComponent {
         this.timerRunning.set(false);
         if (this.timer !== undefined) window.clearInterval(this.timer);
         this.timer = undefined;
+    }
+
+    private clamp(value: number, minimum: number, maximum: number, fallback: number): number {
+        const numeric = Number(value);
+        return Number.isFinite(numeric) ? Math.round(Math.max(minimum, Math.min(maximum, numeric))) : fallback;
     }
 
     private savedKey(storageKey: string): string {
