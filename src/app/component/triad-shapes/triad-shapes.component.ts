@@ -181,6 +181,7 @@ h1, h2, h3 { font-family: Georgia, serif; }
     if (!this.editor) return;
     const printWindow = window.open('', '_blank', 'width=900,height=700');
     if (!printWindow) return;
+    printWindow.addEventListener('load', () => printWindow.print(), { once: true });
     printWindow.document.write(`<!doctype html>
 <html>
 <head>
@@ -198,7 +199,6 @@ h1, h2, h3 { font-family: Georgia, serif; }
 </html>`);
     printWindow.document.close();
     printWindow.focus();
-    printWindow.addEventListener('load', () => printWindow.print(), { once: true });
   }
 
   private restoreSelection(): void {
