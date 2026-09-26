@@ -12,7 +12,7 @@
           <select
             [value]="selectedKey"
             aria-label="Triad key"
-            (change)="selectedKeyChange.emit($any($event.target).value)">
+            (change)="changeSelectedKey($any($event.target).value)">
             @for (option of keys; track option.label) {
               <option [value]="option.label" [selected]="option.label === selectedKey">{{ option.label }} major</option>
             }
@@ -22,9 +22,9 @@
 
       <div class="mode-picker" role="group" aria-label="Chord type">
         <span>CHORD TYPE</span>
-        <button type="button" [class.active]="chordMode === 'major'" (click)="chordModeChange.emit('major')">Major</button>
-        <button type="button" [class.active]="chordMode === 'minor'" (click)="chordModeChange.emit('minor')">Minor</button>
-        <button type="button" [class.active]="chordMode === 'seventh'" (click)="chordModeChange.emit('seventh')">7th</button>
+        <button type="button" [class.active]="chordMode === 'major'" (click)="changeChordMode('major')">Major</button>
+        <button type="button" [class.active]="chordMode === 'minor'" (click)="changeChordMode('minor')">Minor</button>
+        <button type="button" [class.active]="chordMode === 'seventh'" (click)="changeChordMode('seventh')">7th</button>
       </div>
 
       @for (group of triadShapes; track group.degree) {
@@ -253,6 +253,8 @@
         #editor
         class="rich-editor"
         contenteditable="true"
+        [style.font-family]="defaultFontFamily"
+        [style.font-size.px]="defaultFontSize"
         role="textbox"
         aria-multiline="true"
         aria-label="Practice notes"
@@ -262,7 +264,7 @@
         (click)="selectEditorImage($event)"
         (mouseup)="rememberSelection()"
         (keyup)="rememberSelection()"
-        (input)="rememberSelection()">
+        (input)="editorChanged()">
         <h2>{{ selectedKey }} practice notes</h2>
         <p>Drag triad diagrams here to build a practice sheet.</p>
       </div>
