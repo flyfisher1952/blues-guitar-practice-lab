@@ -20,7 +20,8 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "styles": ["src/styles.css"],
-            "assets": []
+            "assets": [],
+            "allowedCommonJsDependencies": ["html-docx-js-typescript"]
           },
           "configurations": {
             "production": {
