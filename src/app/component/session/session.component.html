@@ -47,7 +47,7 @@
             </label>
             <label class="segment-duration">
               <span class="visually-hidden">Duration in minutes</span>
-              <input type="number" min="1" max="240" [value]="segment.plannedMinutes" (change)="updateSegmentMinutes(segment, $any($event.target).valueAsNumber)">
+              <input type="number" min="1" max="240" [value]="segment.plannedMinutes" (input)="updateSegmentMinutes(segment, $any($event.target).valueAsNumber)">
               <small>min</small>
             </label>
             <time class="segment-elapsed">{{ formatTime(segment.elapsedSeconds) }}</time>
