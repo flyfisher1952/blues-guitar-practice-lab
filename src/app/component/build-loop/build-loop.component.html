@@ -1,7 +1,19 @@
 <section class="panel groove-panel" role="tabpanel">
-  <div class="panel-heading">
+  <div class="panel-heading loop-heading">
     <div><p class="eyebrow">BUILD THE LOOP</p><h1>Twelve bars in {{ selectedKey.label }} {{ mode }}</h1></div>
-    <div class="loop-controls">
+  </div>
+
+  <div class="loop-toolbar" aria-label="Loop controls">
+    <div class="loop-control-group loop-style-control">
+      <span class="loop-control-label">BLUES STYLE</span>
+      <div class="groove-tabs" role="tablist" aria-label="Groove style">
+        <button type="button" [class.active]="grooveStyle === 'shuffle'" (click)="grooveStyleChange.emit('shuffle')">Texas shuffle</button>
+        <button type="button" [class.active]="grooveStyle === 'slow'" (click)="grooveStyleChange.emit('slow')">Slow blues</button>
+        <button type="button" [class.active]="grooveStyle === 'rock'" (click)="grooveStyleChange.emit('rock')">Blues rock</button>
+      </div>
+    </div>
+
+    <div class="loop-control-group loop-harmony-control">
       <label class="groove-key-select">
         <span>KEY</span>
         <select
@@ -13,21 +25,20 @@
           }
         </select>
       </label>
-      <label class="tempo"><span>Tempo</span><input type="range" min="55" max="110" [value]="tempo" (input)="tempoChange.emit(+$any($event.target).value)"><strong>{{ tempo }} BPM</strong></label>
+      <div class="loop-mode-buttons" role="group" aria-label="Blues key type">
+        <span class="loop-control-label">TYPE</span>
+        <button type="button" [class.active]="mode === 'major'" (click)="modeChange.emit('major')">Major</button>
+        <button type="button" [class.active]="mode === 'minor'" (click)="modeChange.emit('minor')">Minor</button>
+      </div>
     </div>
-  </div>
 
-  <div class="mode-picker loop-mode-picker" role="group" aria-label="Blues key type">
-    <span>BLUES TYPE</span>
-    <button type="button" [class.active]="mode === 'major'" (click)="modeChange.emit('major')">Major</button>
-    <button type="button" [class.active]="mode === 'minor'" (click)="modeChange.emit('minor')">Minor</button>
-    <small>{{ mode === 'major' ? 'Dominant 7th I–IV–V chords' : 'Minor 7th i–iv with a dominant V' }}</small>
-  </div>
-
-  <div class="groove-tabs" role="tablist" aria-label="Groove style">
-    <button type="button" [class.active]="grooveStyle === 'shuffle'" (click)="grooveStyleChange.emit('shuffle')">Texas shuffle</button>
-    <button type="button" [class.active]="grooveStyle === 'slow'" (click)="grooveStyleChange.emit('slow')">Slow blues</button>
-    <button type="button" [class.active]="grooveStyle === 'rock'" (click)="grooveStyleChange.emit('rock')">Blues rock</button>
+    <div class="loop-control-group loop-tempo-control">
+      <label class="tempo">
+        <span class="loop-control-label">TEMPO</span>
+        <input type="range" min="55" max="110" [value]="tempo" (input)="tempoChange.emit(+$any($event.target).value)">
+        <strong>{{ tempo }} BPM</strong>
+      </label>
+    </div>
   </div>
 
   <div class="beat-player">
