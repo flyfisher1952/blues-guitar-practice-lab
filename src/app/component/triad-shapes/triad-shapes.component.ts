@@ -260,7 +260,7 @@ export class TriadShapesComponent {
     await this.writeSavedFile(blob, suggestedName, handle);
   }
 
-  async saveHtml(): Promise<void> {  async saveHtml(): Promise<void> {
+  async saveHtml(): Promise<void> {
     if (!this.editor) return;
     const suggestedName = this.suggestedFileName('html');
     const handle = await this.chooseSaveHandle(suggestedName, 'HTML document', 'text/html', '.html');
