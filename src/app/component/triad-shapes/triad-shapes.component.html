@@ -122,6 +122,7 @@
               <button type="button" role="menuitem" (click)="saveHtml(); closeMenus()">Save…</button>
               <button type="button" role="menuitem" (click)="saveDocx(); closeMenus()">Save as Word document…</button>
               <div class="menu-separator" role="separator"></div>
+              <button type="button" role="menuitem" (click)="openSettings(); closeMenus()">Settings…</button>
               <button type="button" role="menuitem" (click)="saveSettings(); closeMenus()">Save settings…</button>
               <button type="button" role="menuitem" (click)="chooseSettingsFile(); closeMenus()">Load settings…</button>
               <div class="menu-separator" role="separator"></div>
@@ -267,4 +268,84 @@
       </div>
     </aside>
   </div>
+
+  @if (settingsOpen) {
+    <div class="settings-backdrop" role="presentation" (click)="closeSettings()">
+      <section
+        class="settings-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="editor-settings-title"
+        (click)="$event.stopPropagation()">
+        <header>
+          <div>
+            <p class="eyebrow">PRACTICE DOCUMENT</p>
+            <h2 id="editor-settings-title">Editor Settings</h2>
+          </div>
+          <button type="button" class="settings-close" aria-label="Close settings" (click)="closeSettings()">×</button>
+        </header>
+
+        <div class="settings-fields">
+          <label>
+            <span>Default font</span>
+            <select [value]="settingsFontFamily" (change)="settingsFontFamily = $any($event.target).value">
+              <option value="Arial">Arial</option>
+              <option value="Consolas">Consolas</option>
+              <option value="Courier New">Courier New</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Tahoma">Tahoma</option>
+              <option value="Times New Roman">Times New Roman</option>
+              <option value="Verdana">Verdana</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Default text size</span>
+            <div class="settings-number">
+              <input
+                type="number"
+                min="10"
+                max="32"
+                step="1"
+                [value]="settingsFontSize"
+                (input)="settingsFontSize = $any($event.target).valueAsNumber">
+              <span>px</span>
+            </div>
+          </label>
+
+          <label>
+            <span>Image drop size</span>
+            <div class="settings-number">
+              <input
+                type="number"
+                min="40"
+                max="680"
+                step="1"
+                [value]="settingsImageDropSize"
+                (input)="settingsImageDropSize = $any($event.target).valueAsNumber">
+              <span>px</span>
+            </div>
+          </label>
+
+          <label class="settings-checkbox">
+            <input
+              type="checkbox"
+              [checked]="settingsLoadLastDocument"
+              (change)="settingsLoadLastDocument = $any($event.target).checked">
+            <span>Load the last document when the app starts</span>
+          </label>
+        </div>
+
+        <div class="settings-file-actions">
+          <button type="button" (click)="chooseSettingsFile()">Load settings file…</button>
+          <button type="button" (click)="saveEditorSettings(); saveSettings()">Save settings file…</button>
+        </div>
+
+        <footer>
+          <button type="button" (click)="closeSettings()">Cancel</button>
+          <button type="button" class="primary" (click)="saveEditorSettings()">Apply</button>
+        </footer>
+      </section>
+    </div>
+  }
 </section>
