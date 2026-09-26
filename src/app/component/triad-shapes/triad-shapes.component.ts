@@ -186,7 +186,6 @@ h1, h2, h3 { font-family: Georgia, serif; }
     if (!this.editor) return;
     const printWindow = window.open('', '_blank', 'width=900,height=700');
     if (!printWindow) return;
-    printWindow.addEventListener('load', () => printWindow.print(), { once: true });
     printWindow.document.write(`<!doctype html>
 <html>
 <head>
@@ -194,13 +193,27 @@ h1, h2, h3 { font-family: Georgia, serif; }
 <title>${this.escapeHtml(this.selectedKey)} practice notes</title>
 <style>
 @page { margin: 0.6in; }
-body { color: #17130f; font-family: Arial, sans-serif; line-height: 1.45; }
+body { margin: 0; color: #17130f; font-family: Arial, sans-serif; line-height: 1.45; }
+.print-controls { padding: 12px 20px; position: sticky; top: 0; display: flex; gap: 8px; background: #17130f; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+.print-controls button { min-height: 40px; padding: 0 18px; border: 1px solid #f3ecdf; color: #17130f; background: #f3ecdf; font: 700 14px Arial, sans-serif; cursor: pointer; }
+.print-controls button:first-child { color: white; border-color: #9d2d24; background: #9d2d24; }
+.print-content { padding: 24px; }
 h1, h2, h3 { font-family: Georgia, serif; }
-.resizable-image { display: inline-block; max-width: 100%; margin: 8px; vertical-align: top; break-inside: avoid; }
+.resizable-image { display: inline-block; max-width: 100%; margin: 2px; vertical-align: top; break-inside: avoid; }
 .resizable-image img { display: block; width: 100%; height: auto; }
+@media print {
+  .print-controls { display: none; }
+  .print-content { padding: 0; }
+}
 </style>
 </head>
-<body>${this.editor.nativeElement.innerHTML}</body>
+<body>
+  <div class="print-controls">
+    <button type="button" onclick="window.print()">Print this page</button>
+    <button type="button" onclick="window.close()">Close</button>
+  </div>
+  <main class="print-content">${this.editor.nativeElement.innerHTML}</main>
+</body>
 </html>`);
     printWindow.document.close();
     printWindow.focus();
