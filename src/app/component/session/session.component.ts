@@ -181,6 +181,10 @@ export class SessionComponent implements OnInit, OnDestroy {
     return hours ? `${hours} hr ${minutes} min` : `${minutes} min`;
   }
 
+  dayTotal(day: PracticeDay): number {
+    return Object.values(day.segments).reduce((sum, seconds) => sum + seconds, 0);
+  }
+
   private stopClock(): void {
     this.timerRunning = false;
     if (this.timer !== undefined) window.clearInterval(this.timer);
@@ -189,7 +193,8 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   private recordSecond(segmentName: string): void {
-    const date = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     let day = this.history.find(entry => entry.date === date);
     if (!day) {
       day = { date, segments: {} };
