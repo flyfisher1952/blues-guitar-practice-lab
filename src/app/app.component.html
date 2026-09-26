@@ -18,17 +18,7 @@
 
 <main>
   @if (activeTab() === 'session') {
-    <app-session
-      [blocks]="blocks"
-      [completed]="completed()"
-      [timerText]="timerText()"
-      [timerRunning]="timerRunning()"
-      [seconds]="seconds()"
-      [completedCount]="completedCount()"
-      (blockToggled)="toggleBlock($event)"
-      (progressReset)="resetProgress()"
-      (timerToggled)="toggleTimer()"
-      (timerReset)="resetTimer()" />
+    <app-session [blocks]="blocks" />
   }
 
   @if (activeTab() === 'triads') {
