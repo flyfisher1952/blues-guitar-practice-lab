@@ -87,53 +87,99 @@
 
     <aside class="notes-workspace" aria-label="Practice notes editor">
       <div class="editor-heading">
-        <div><p class="eyebrow">PRACTICE PAGE</p><h2>Arrange your shapes</h2></div>
-        <div class="editor-file-actions">
-          <input #fileInput class="visually-hidden" type="file" accept=".html,.htm,.txt,text/html,text/plain" (change)="loadEditorFile($event)">
-          <button type="button" (click)="chooseEditorFile()">Load</button>
-          <button type="button" (click)="saveHtml()">Save HTML</button>
-          <button type="button" (click)="saveDocx()">Save DOCX</button>
-          <button type="button" (click)="printEditor()">Print</button>
-          <button type="button" class="clear-editor" (click)="clearEditor()">Clear</button>
-        </div>
+        <div><p class="eyebrow">PRACTICE DOCUMENT</p><h2>Create a Practice Doc</h2></div>
       </div>
-      <p class="editor-help">Type and format notes, drop in your own images, or drag a triad diagram from the library.</p>
 
-      <div class="editor-toolbar" role="toolbar" aria-label="Text formatting">
-        <button type="button" title="Bold" aria-label="Bold" (mousedown)="$event.preventDefault()" (click)="format('bold')"><b>B</b></button>
-        <button type="button" title="Italic" aria-label="Italic" (mousedown)="$event.preventDefault()" (click)="format('italic')"><i>I</i></button>
-        <button type="button" title="Underline" aria-label="Underline" (mousedown)="$event.preventDefault()" (click)="format('underline')"><u>U</u></button>
-        <button type="button" title="Align left" aria-label="Align left" (mousedown)="$event.preventDefault()" (click)="format('justifyLeft')">⇤</button>
-        <button type="button" title="Center" aria-label="Center" (mousedown)="$event.preventDefault()" (click)="format('justifyCenter')">↔</button>
-        <button type="button" title="Align right" aria-label="Align right" (mousedown)="$event.preventDefault()" (click)="format('justifyRight')">⇥</button>
-        <button type="button" title="Bulleted list" aria-label="Bulleted list" (mousedown)="$event.preventDefault()" (click)="format('insertUnorderedList')">• List</button>
-        <button type="button" title="Numbered list" aria-label="Numbered list" (mousedown)="$event.preventDefault()" (click)="format('insertOrderedList')">1. List</button>
+      <div class="document-menu-bar" role="menubar" aria-label="Practice document menu" (click)="$event.stopPropagation()">
+        <input #fileInput class="visually-hidden" type="file" accept=".html,.htm,.txt,text/html,text/plain" (change)="loadEditorFile($event)">
 
-        <select aria-label="Text style" title="Text style" (change)="format('formatBlock', $any($event.target).value)">
-          <option value="p">Paragraph</option>
-          <option value="h2">Heading</option>
-          <option value="h3">Subheading</option>
-        </select>
-        <select aria-label="Font family" title="Font family" (change)="format('fontName', $any($event.target).value)">
-          <option value="Arial">Arial</option>
-          <option value="Consolas">Consolas (fixed width)</option>
-          <option value="Courier New">Courier New (fixed width)</option>
-          <option value="Georgia">Georgia</option>
-          <option value="Tahoma">Tahoma</option>
-          <option value="Times New Roman">Times New Roman</option>
-          <option value="Verdana">Verdana</option>
-        </select>
-        <select aria-label="Font size" title="Font size" (change)="format('fontSize', $any($event.target).value)">
-          <option value="2">Small</option>
-          <option value="3" selected>Normal</option>
-          <option value="4">Large</option>
-          <option value="5">Larger</option>
-          <option value="6">Largest</option>
-        </select>
-        <label class="text-color" title="Text color">
-          <span>Color</span>
-          <input type="color" value="#17130f" aria-label="Text color" (input)="format('foreColor', $any($event.target).value)">
-        </label>
+        <div class="document-menu">
+          <button
+            type="button"
+            class="menu-trigger"
+            role="menuitem"
+            aria-haspopup="true"
+            [attr.aria-expanded]="openMenu === 'file'"
+            (click)="toggleMenu('file')">File</button>
+          @if (openMenu === 'file') {
+            <div class="menu-dropdown file-menu" role="menu">
+              <button type="button" role="menuitem" (click)="chooseEditorFile(); closeMenus()">Load…</button>
+              <button type="button" role="menuitem" (click)="saveHtml(); closeMenus()">Save…</button>
+              <button type="button" role="menuitem" (click)="saveDocx(); closeMenus()">Save as Word document…</button>
+              <div class="menu-separator" role="separator"></div>
+              <button type="button" role="menuitem" (click)="printEditor(); closeMenus()">Print…</button>
+              <button type="button" role="menuitem" (click)="clearEditor(); closeMenus()">Clear document</button>
+            </div>
+          }
+        </div>
+
+        <div class="document-menu">
+          <button
+            type="button"
+            class="menu-trigger"
+            role="menuitem"
+            aria-haspopup="true"
+            [attr.aria-expanded]="openMenu === 'edit'"
+            (click)="toggleMenu('edit')">Edit</button>
+          @if (openMenu === 'edit') {
+            <div class="menu-dropdown edit-menu" role="menu">
+              <div class="menu-item-with-submenu">
+                <button type="button" class="submenu-trigger" role="menuitem" aria-haspopup="true">Text <span>›</span></button>
+                <div class="editor-submenu" role="menu" aria-label="Text formatting">
+                  <button type="button" role="menuitem" (mousedown)="$event.preventDefault()" (click)="format('bold'); closeMenus()"><b>Bold</b></button>
+                  <button type="button" role="menuitem" (mousedown)="$event.preventDefault()" (click)="format('italic'); closeMenus()"><i>Italic</i></button>
+                  <button type="button" role="menuitem" (mousedown)="$event.preventDefault()" (click)="format('underline'); closeMenus()"><u>Underline</u></button>
+                </div>
+              </div>
+
+              <div class="menu-item-with-submenu">
+                <button type="button" class="submenu-trigger" role="menuitem" aria-haspopup="true">Align <span>›</span></button>
+                <div class="editor-submenu" role="menu" aria-label="Text alignment">
+                  <button type="button" role="menuitem" (mousedown)="$event.preventDefault()" (click)="format('justifyLeft'); closeMenus()">Left</button>
+                  <button type="button" role="menuitem" (mousedown)="$event.preventDefault()" (click)="format('justifyCenter'); closeMenus()">Center</button>
+                  <button type="button" role="menuitem" (mousedown)="$event.preventDefault()" (click)="format('justifyRight'); closeMenus()">Right</button>
+                </div>
+              </div>
+
+              <div class="menu-item-with-submenu">
+                <button type="button" class="submenu-trigger" role="menuitem" aria-haspopup="true">Format <span>›</span></button>
+                <div class="editor-submenu" role="menu" aria-label="Paragraph format">
+                  <button type="button" role="menuitem" (mousedown)="$event.preventDefault()" (click)="format('formatBlock', 'p'); closeMenus()">Paragraph</button>
+                  <button type="button" role="menuitem" (mousedown)="$event.preventDefault()" (click)="format('formatBlock', 'h2'); closeMenus()">Heading</button>
+                  <button type="button" role="menuitem" (mousedown)="$event.preventDefault()" (click)="format('formatBlock', 'h3'); closeMenus()">Subheading</button>
+                </div>
+              </div>
+
+              <div class="menu-item-with-submenu">
+                <button type="button" class="submenu-trigger" role="menuitem" aria-haspopup="true">Font <span>›</span></button>
+                <div class="editor-submenu font-submenu" role="menu" aria-label="Font settings">
+                  <label>
+                    <span>Family</span>
+                    <select aria-label="Font family" (change)="format('fontName', $any($event.target).value)">
+                      <option value="Arial">Arial</option>
+                      <option value="Consolas">Consolas</option>
+                      <option value="Courier New">Courier New</option>
+                      <option value="Georgia">Georgia</option>
+                      <option value="Tahoma">Tahoma</option>
+                      <option value="Times New Roman">Times New Roman</option>
+                      <option value="Verdana">Verdana</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Size</span>
+                    <select aria-label="Font size" (change)="format('fontSize', $any($event.target).value)">
+                      <option value="2">Small</option>
+                      <option value="3" selected>Normal</option>
+                      <option value="4">Large</option>
+                      <option value="5">Larger</option>
+                      <option value="6">Largest</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
       </div>
 
       <div class="image-size-control" [class.enabled]="selectedImage">
