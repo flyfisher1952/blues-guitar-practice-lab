@@ -75,6 +75,7 @@ export class AppComponent {
     readonly activeTab = signal<PracticeTab>("session");
     readonly triadSelectedKey = signal(this.savedKey("labTriadKey"));
     readonly loopSelectedKey = signal(this.savedKey("labLoopKey"));
+    readonly loopMode = signal<"major" | "minor">(this.savedLoopMode());
     readonly chordMode = signal<ChordMode>(this.savedChordMode());
     readonly grooveStyle = signal<GrooveStyle>("shuffle");
     readonly tempo = signal(72);
@@ -105,6 +106,11 @@ export class AppComponent {
     changeLoopKey(label: string): void {
         this.loopSelectedKey.set(label);
         localStorage.setItem("labLoopKey", label);
+    }
+
+    setLoopMode(mode: "major" | "minor"): void {
+        this.loopMode.set(mode);
+        localStorage.setItem("labLoopMode", mode);
     }
 
     setChordMode(mode: ChordMode): void {
@@ -164,6 +170,10 @@ export class AppComponent {
     private savedKey(storageKey: string): string {
         const saved = localStorage.getItem(storageKey) ?? localStorage.getItem("labKey") ?? "G";
         return this.keys.some((key) => key.label === saved) ? saved : "G";
+    }
+
+    private savedLoopMode(): "major" | "minor" {
+        return localStorage.getItem("labLoopMode") === "minor" ? "minor" : "major";
     }
 
     private savedChordMode(): ChordMode {
