@@ -14,7 +14,7 @@
             aria-label="Triad key"
             (change)="selectedKeyChange.emit($any($event.target).value)">
             @for (option of keys; track option.label) {
-              <option [value]="option.label">{{ option.label }} major</option>
+              <option [value]="option.label" [selected]="option.label === selectedKey">{{ option.label }} major</option>
             }
           </select>
         </label>
