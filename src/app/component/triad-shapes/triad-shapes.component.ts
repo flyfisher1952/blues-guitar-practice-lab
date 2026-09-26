@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild } from '@angular/core';
 import { asBlob } from 'html-docx-js-typescript';
 import { ChordMode, KeyOption, TriadGroup, TriadShape } from '../../model/models';
 
@@ -29,6 +29,17 @@ interface PracticeSettings {
   chordMode: ChordMode;
   documentName: string;
   editorHtml: string;
+  defaultFontFamily?: string;
+  defaultFontSize?: number;
+  imageDropSize?: number;
+  loadLastDocument?: boolean;
+}
+
+interface EditorPreferences {
+  defaultFontFamily: string;
+  defaultFontSize: number;
+  imageDropSize: number;
+  loadLastDocument: boolean;
 }
 
 @Component({
@@ -36,7 +47,7 @@ interface PracticeSettings {
   standalone: true,
   templateUrl: './triad-shapes.component.html'
 })
-export class TriadShapesComponent {
+export class TriadShapesComponent implements AfterViewInit {
   @ViewChild('editor') private editor?: ElementRef<HTMLDivElement>;
   @ViewChild('fileInput') private fileInput?: ElementRef<HTMLInputElement>;
   @ViewChild('settingsInput') private settingsInput?: ElementRef<HTMLInputElement>;
@@ -54,10 +65,28 @@ export class TriadShapesComponent {
   libraryWidth = 52;
   resizing = false;
   currentDocumentName = 'Untitled practice document';
+  defaultFontFamily = 'Arial';
+  defaultFontSize = 16;
+  imageDropSize = 100;
+  loadLastDocument = false;
+  settingsOpen = false;
+  settingsFontFamily = 'Arial';
+  settingsFontSize = 16;
+  settingsImageDropSize = 100;
+  settingsLoadLastDocument = false;
   openMenu?: 'file' | 'edit' | 'insert';
   readonly stringNumbers = [6, 5, 4, 3, 2, 1];
   private savedRange?: Range;
   private imageSequence = 0;
+  private readonly preferencesKey = 'practiceEditorPreferences';
+  private readonly lastDocumentKey = 'practiceEditorLastDocument';
+
+  ngAfterViewInit(): void {
+    window.setTimeout(() => {
+      this.restorePreferences();
+      if (this.loadLastDocument) this.restoreLastDocument();
+    });
+  }
 
   @HostListener('document:click')
   closeMenus(): void {
@@ -103,13 +132,13 @@ export class TriadShapesComponent {
     this.placeCaret(event.clientX, event.clientY);
     const triadSource = event.dataTransfer?.getData('application/x-triad-image');
     if (triadSource) {
-      this.insertImage(triadSource, 'Dragged triad diagram', 100);
+      this.insertImage(triadSource, 'Dragged triad diagram', this.imageDropSize);
       return;
     }
     const imageFile = Array.from(event.dataTransfer?.files ?? []).find(file => file.type.startsWith('image/'));
     if (!imageFile || imageFile.size > 8 * 1024 * 1024) return;
     const reader = new FileReader();
-    reader.onload = () => this.insertImage(String(reader.result), imageFile.name, 240);
+    reader.onload = () => this.insertImage(String(reader.result), imageFile.name, this.imageDropSize);
     reader.readAsDataURL(imageFile);
   }
 
@@ -169,6 +198,38 @@ export class TriadShapesComponent {
     );
   }
 
+  openSettings(): void {
+    this.settingsFontFamily = this.defaultFontFamily;
+    this.settingsFontSize = this.defaultFontSize;
+    this.settingsImageDropSize = this.imageDropSize;
+    this.settingsLoadLastDocument = this.loadLastDocument;
+    this.settingsOpen = true;
+  }
+
+  closeSettings(): void {
+    this.settingsOpen = false;
+  }
+
+  saveEditorSettings(): void {
+    this.defaultFontFamily = this.allowedFont(this.settingsFontFamily);
+    this.defaultFontSize = this.clamp(this.settingsFontSize, 10, 32, 16);
+    this.imageDropSize = this.clamp(this.settingsImageDropSize, 40, 680, 100);
+    this.selectedImageWidth = this.imageDropSize;
+    this.loadLastDocument = this.settingsLoadLastDocument;
+    this.persistPreferences();
+    if (this.loadLastDocument) {
+      this.saveLastDocument();
+    } else {
+      localStorage.removeItem(this.lastDocumentKey);
+    }
+    this.settingsOpen = false;
+  }
+
+  editorChanged(): void {
+    this.rememberSelection();
+    this.saveLastDocument();
+  }
+
   selectEditorImage(event: MouseEvent): void {
     const wrapper = (event.target as HTMLElement).closest('.resizable-image') as HTMLElement | null;
     this.selectedImage = wrapper ?? undefined;
@@ -193,6 +254,7 @@ export class TriadShapesComponent {
     this.currentDocumentName = 'Untitled practice document';
     this.selectedImage = undefined;
     this.savedRange = undefined;
+    this.saveLastDocument();
   }
 
   async chooseEditorFile(): Promise<void> {
@@ -251,6 +313,7 @@ export class TriadShapesComponent {
         this.restorePracticeContext(settings.selectedKey, settings.chordMode);
         this.currentDocumentName = settings.documentName?.trim() || 'Untitled practice document';
         this.editor!.nativeElement.innerHTML = this.sanitizeLoadedHtml(settings.editorHtml) || '<br>';
+        this.applyPreferences(settings);
         this.selectedImage = undefined;
         this.savedRange = undefined;
       } catch (error) {
@@ -278,7 +341,11 @@ export class TriadShapesComponent {
       selectedKey: this.selectedKey,
       chordMode: this.chordMode,
       documentName: this.currentDocumentName,
-      editorHtml: this.editor.nativeElement.innerHTML
+      editorHtml: this.editor.nativeElement.innerHTML,
+      defaultFontFamily: this.defaultFontFamily,
+      defaultFontSize: this.defaultFontSize,
+      imageDropSize: this.imageDropSize,
+      loadLastDocument: this.loadLastDocument
     };
     const blob = new Blob([JSON.stringify(settings, null, 2)], {
       type: 'application/json;charset=utf-8'
@@ -456,6 +523,82 @@ body { margin: 0; padding: 32px; color: #17130f; background: #f3ecdf; font-famil
     }
     this.selectedImage = undefined;
     this.savedRange = undefined;
+    this.saveLastDocument();
+  }
+
+  private restorePreferences(): void {
+    try {
+      const saved = JSON.parse(localStorage.getItem(this.preferencesKey) ?? '{}') as Partial<EditorPreferences>;
+      this.applyPreferences(saved);
+    } catch {
+      localStorage.removeItem(this.preferencesKey);
+    }
+  }
+
+  private applyPreferences(settings: Partial<EditorPreferences>): void {
+    if (typeof settings.defaultFontFamily === 'string') {
+      this.defaultFontFamily = this.allowedFont(settings.defaultFontFamily);
+    }
+    if (typeof settings.defaultFontSize === 'number') {
+      this.defaultFontSize = this.clamp(settings.defaultFontSize, 10, 32, 16);
+    }
+    if (typeof settings.imageDropSize === 'number') {
+      this.imageDropSize = this.clamp(settings.imageDropSize, 40, 680, 100);
+      this.selectedImageWidth = this.imageDropSize;
+    }
+    if (typeof settings.loadLastDocument === 'boolean') {
+      this.loadLastDocument = settings.loadLastDocument;
+    }
+    this.persistPreferences();
+  }
+
+  private persistPreferences(): void {
+    const preferences: EditorPreferences = {
+      defaultFontFamily: this.defaultFontFamily,
+      defaultFontSize: this.defaultFontSize,
+      imageDropSize: this.imageDropSize,
+      loadLastDocument: this.loadLastDocument
+    };
+    localStorage.setItem(this.preferencesKey, JSON.stringify(preferences));
+  }
+
+  private saveLastDocument(): void {
+    if (!this.loadLastDocument || !this.editor) return;
+    try {
+      const snapshot: PracticeSettings = {
+        version: 1,
+        selectedKey: this.selectedKey,
+        chordMode: this.chordMode,
+        documentName: this.currentDocumentName,
+        editorHtml: this.editor.nativeElement.innerHTML
+      };
+      localStorage.setItem(this.lastDocumentKey, JSON.stringify(snapshot));
+    } catch (error) {
+      console.warn('The current document is too large for browser recovery storage.', error);
+    }
+  }
+
+  private restoreLastDocument(): void {
+    if (!this.editor) return;
+    try {
+      const snapshot = JSON.parse(localStorage.getItem(this.lastDocumentKey) ?? 'null') as PracticeSettings | null;
+      if (!snapshot || snapshot.version !== 1 || typeof snapshot.editorHtml !== 'string') return;
+      this.restorePracticeContext(snapshot.selectedKey, snapshot.chordMode);
+      this.currentDocumentName = snapshot.documentName?.trim() || 'Untitled practice document';
+      this.editor.nativeElement.innerHTML = this.sanitizeLoadedHtml(snapshot.editorHtml) || '<br>';
+    } catch {
+      localStorage.removeItem(this.lastDocumentKey);
+    }
+  }
+
+  private allowedFont(value: string): string {
+    const fonts = ['Arial', 'Consolas', 'Courier New', 'Georgia', 'Tahoma', 'Times New Roman', 'Verdana'];
+    return fonts.includes(value) ? value : 'Arial';
+  }
+
+  private clamp(value: number, minimum: number, maximum: number, fallback: number): number {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? Math.round(Math.max(minimum, Math.min(maximum, numeric))) : fallback;
   }
 
   private async writeSavedFile(
