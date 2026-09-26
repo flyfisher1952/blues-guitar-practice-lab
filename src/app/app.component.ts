@@ -73,7 +73,8 @@ export class AppComponent {
     };
 
     readonly activeTab = signal<PracticeTab>("session");
-    readonly selectedKey = signal(this.savedKey());
+    readonly triadSelectedKey = signal(this.savedKey("labTriadKey"));
+    readonly loopSelectedKey = signal(this.savedKey("labLoopKey"));
     readonly chordMode = signal<ChordMode>(this.savedChordMode());
     readonly grooveStyle = signal<GrooveStyle>("shuffle");
     readonly tempo = signal(72);
