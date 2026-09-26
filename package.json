@@ -5,6 +5,7 @@
     "scripts": {
         "start": "ng serve",
         "build": "ng build",
+        "build:pages": "ng build --configuration production --base-href /blues-guitar-practice-lab/",
         "test": "ng test",
         "deploy": "bash scripts/deploy-to-iis.sh",
         "build:deploy": "npm run build && npm run deploy"
