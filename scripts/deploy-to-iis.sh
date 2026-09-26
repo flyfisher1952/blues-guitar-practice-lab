@@ -12,7 +12,7 @@ if [[ ! -f "$source_dir/index.html" ]]; then
 fi
 
 mkdir -p "$iis_dir"
-cp -R "$source_dir/*" "$iis_dir/"
+cp -R "$source_dir"/. "$iis_dir"/
 
 echo "Deployment completed."
 echo "Open http://localhost"
