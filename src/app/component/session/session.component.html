@@ -30,7 +30,7 @@
           <p class="eyebrow">SESSION DIVISIONS</p>
           <h2 id="segments-heading">Choose what to practice</h2>
         </div>
-        <button type="button" (click)="addSegment()">Add division</button>
+        <button class="add-segment-button" type="button" title="Add Segment" aria-label="Add Segment" (click)="openAddSegment()">＋</button>
       </header>
 
       <div class="segment-editor-list">
@@ -51,13 +51,13 @@
               <small>min</small>
             </label>
             <time class="segment-elapsed">{{ formatTime(segment.elapsedSeconds) }}</time>
-            <div class="segment-inline-controls">
-              <button type="button" (click)="startSegment(segment)">
-                {{ activeSegmentId === segment.id && timerRunning ? 'Stop' : segment.elapsedSeconds ? 'Resume' : 'Start' }}
-              </button>
-              <button type="button" (click)="resetSegment(segment)">Reset</button>
+            <div class="segment-inline-controls timer-icon-controls">
+              <button class="timer-start" type="button" title="Start or resume" aria-label="Start or resume" [disabled]="activeSegmentId === segment.id && timerRunning" (click)="startSegment(segment)">▶</button>
+              <button class="timer-pause" type="button" title="Pause" aria-label="Pause" [disabled]="activeSegmentId !== segment.id || !timerRunning" (click)="pauseSegment(segment)">Ⅱ</button>
+              <button class="timer-stop" type="button" title="Stop" aria-label="Stop" [disabled]="activeSegmentId !== segment.id" (click)="stopSegment(segment)">■</button>
+              <button class="timer-clear" type="button" title="Clear elapsed time" aria-label="Clear elapsed time" [disabled]="segment.elapsedSeconds === 0" (click)="resetSegment(segment)">✕</button>
             </div>
-            <button class="segment-remove" type="button" aria-label="Remove division" (click)="removeSegment(segment)">×</button>
+            <button class="segment-remove" type="button" title="Remove segment" aria-label="Remove segment" (click)="removeSegment(segment)">🗑</button>
           </div>
         }
       </div>
@@ -95,6 +95,46 @@
     </aside>
   </div>
 
+  @if (addSegmentOpen) {
+    <div class="add-segment-backdrop" role="presentation" (click)="closeAddSegment()">
+      <section
+        class="add-segment-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="add-segment-title"
+        (click)="$event.stopPropagation()">
+        <header>
+          <div>
+            <p class="eyebrow">SESSION DIVISION</p>
+            <h2 id="add-segment-title">Add Segment</h2>
+          </div>
+          <button type="button" aria-label="Close" (click)="closeAddSegment()">×</button>
+        </header>
+        <div class="add-segment-fields">
+          <label>
+            <span>Name</span>
+            <input type="text" autofocus [value]="newSegmentName" (input)="newSegmentName = $any($event.target).value">
+          </label>
+          <label>
+            <span>Hint text</span>
+            <textarea rows="3" [value]="newSegmentHint" (input)="newSegmentHint = $any($event.target).value"></textarea>
+          </label>
+          <label>
+            <span>Duration</span>
+            <span class="dialog-duration">
+              <input type="number" min="1" max="240" [value]="newSegmentMinutes" (input)="newSegmentMinutes = $any($event.target).valueAsNumber">
+              <small>minutes</small>
+            </span>
+          </label>
+        </div>
+        <footer>
+          <button type="button" (click)="closeAddSegment()">Cancel</button>
+          <button type="button" class="primary" [disabled]="!newSegmentName.trim()" (click)="addSegment()">Add Segment</button>
+        </footer>
+      </section>
+    </div>
+  }
+
   @if (monitorOpen) {
     <aside class="session-monitor" role="dialog" aria-modal="false" aria-labelledby="session-monitor-title">
       <header>
@@ -119,11 +159,11 @@
               <small>{{ segment.plannedMinutes }} min planned</small>
             </div>
             <time>{{ formatTime(segment.elapsedSeconds) }}</time>
-            <div class="monitor-controls">
-              <button type="button" (click)="startSegment(segment)">
-                {{ activeSegmentId === segment.id && timerRunning ? 'Stop' : segment.elapsedSeconds ? 'Resume' : 'Start' }}
-              </button>
-              <button type="button" (click)="resetSegment(segment)">Reset</button>
+            <div class="monitor-controls timer-icon-controls">
+              <button class="timer-start" type="button" title="Start or resume" aria-label="Start or resume" [disabled]="activeSegmentId === segment.id && timerRunning" (click)="startSegment(segment)">▶</button>
+              <button class="timer-pause" type="button" title="Pause" aria-label="Pause" [disabled]="activeSegmentId !== segment.id || !timerRunning" (click)="pauseSegment(segment)">Ⅱ</button>
+              <button class="timer-stop" type="button" title="Stop" aria-label="Stop" [disabled]="activeSegmentId !== segment.id" (click)="stopSegment(segment)">■</button>
+              <button class="timer-clear" type="button" title="Clear elapsed time" aria-label="Clear elapsed time" [disabled]="segment.elapsedSeconds === 0" (click)="resetSegment(segment)">✕</button>
             </div>
           </section>
         }
