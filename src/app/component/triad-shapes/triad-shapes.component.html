@@ -136,9 +136,32 @@
       </div>
 
       <div class="image-size-control" [class.enabled]="selectedImage">
-        <label for="image-size">Selected image size</label>
-        <input id="image-size" type="range" min="40" max="680" [value]="selectedImageWidth" [disabled]="!selectedImage" (input)="resizeSelected($event)">
-        <span>{{ selectedImage ? selectedImageWidth + ' px' : 'Select an image' }}</span>
+        <label for="image-size">{{ selectedImage ? 'Selected image size' : 'Select an image' }}</label>
+        <div class="image-size-slider">
+          <input id="image-size" type="range" min="40" max="680" step="1" list="image-size-marks" [value]="selectedImageWidth" [disabled]="!selectedImage" (input)="resizeSelected($event)">
+          <datalist id="image-size-marks">
+            <option value="40"></option>
+            <option value="200"></option>
+            <option value="360"></option>
+            <option value="520"></option>
+            <option value="680"></option>
+          </datalist>
+          <div class="image-size-scale" aria-hidden="true">
+            <span>40</span><span>200</span><span>360</span><span>520</span><span>680</span>
+          </div>
+        </div>
+        <label class="manual-image-size">
+          <input
+            type="number"
+            min="40"
+            max="680"
+            step="1"
+            [value]="selectedImageWidth"
+            [disabled]="!selectedImage"
+            aria-label="Image width in pixels"
+            (change)="setSelectedImageWidth($any($event.target).value)">
+          <span>px</span>
+        </label>
       </div>
 
       <div
