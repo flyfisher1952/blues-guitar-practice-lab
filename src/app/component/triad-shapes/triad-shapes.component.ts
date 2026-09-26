@@ -172,6 +172,7 @@ export class TriadShapesComponent {
 
   clearEditor(): void {
     if (this.editor) this.editor.nativeElement.innerHTML = '<br>';
+    this.currentDocumentName = 'Untitled practice document';
     this.selectedImage = undefined;
     this.savedRange = undefined;
   }
