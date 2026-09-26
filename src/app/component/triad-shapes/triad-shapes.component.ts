@@ -192,7 +192,12 @@ export class TriadShapesComponent {
       if (file.type === 'text/plain' || file.name.toLowerCase().endsWith('.txt')) {
         const textHtml = this.escapeHtml(raw).replace(/\r\n?|\n/g, '<br>') || '<br>';
         this.editor!.nativeElement.innerHTML = `<span style="font-weight:400">${textHtml}</span>`;
+        this.currentDocumentName = file.name;
       } else {
+        const parsed = new DOMParser().parseFromString(raw, 'text/html');
+        const notes = parsed.querySelector<HTMLElement>('#practice-notes');
+        this.restorePracticeContext(notes?.dataset['practiceKey'], notes?.dataset['chordMode']);
+        this.currentDocumentName = notes?.dataset['documentName']?.trim() || file.name;
         this.editor!.nativeElement.innerHTML = this.sanitizeLoadedHtml(raw);
       }
       this.selectedImage = undefined;
@@ -201,18 +206,76 @@ export class TriadShapesComponent {
     reader.readAsText(file);
   }
 
-  async saveHtml(): Promise<void> {
+  chooseSettingsFile(): void {
+    this.settingsInput?.nativeElement.click();
+  }
+
+  loadSettingsFile(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file || file.size > 12 * 1024 * 1024 || !this.editor) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const settings = JSON.parse(String(reader.result ?? '')) as Partial<PracticeSettings>;
+        if (settings.version !== 1 || typeof settings.editorHtml !== 'string') {
+          throw new Error('Unsupported settings file.');
+        }
+        this.restorePracticeContext(settings.selectedKey, settings.chordMode);
+        this.currentDocumentName = settings.documentName?.trim() || 'Untitled practice document';
+        this.editor!.nativeElement.innerHTML = this.sanitizeLoadedHtml(settings.editorHtml) || '<br>';
+        this.selectedImage = undefined;
+        this.savedRange = undefined;
+      } catch (error) {
+        console.error('Settings load failed', error);
+        window.alert('That file is not a valid practice-document settings file.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  async saveSettings(): Promise<void> {
+    if (!this.editor) return;
+    const suggestedName = 'blues-guitar-practice-settings.json';
+    const handle = await this.chooseSaveHandle(
+      suggestedName,
+      'Practice document settings',
+      'application/json',
+      '.json'
+    );
+    if (handle === null) return;
+
+    const settings: PracticeSettings = {
+      version: 1,
+      selectedKey: this.selectedKey,
+      chordMode: this.chordMode,
+      documentName: this.currentDocumentName,
+      editorHtml: this.editor.nativeElement.innerHTML
+    };
+    const blob = new Blob([JSON.stringify(settings, null, 2)], {
+      type: 'application/json;charset=utf-8'
+    });
+    await this.writeSavedFile(blob, suggestedName, handle);
+  }
+
+  async saveHtml(): Promise<void> {  async saveHtml(): Promise<void> {
     if (!this.editor) return;
     const suggestedName = this.suggestedFileName('html');
     const handle = await this.chooseSaveHandle(suggestedName, 'HTML document', 'text/html', '.html');
     if (handle === null) return;
 
+    const documentName = handle?.name ?? suggestedName;
     const documentHtml = this.buildDocumentHtml(
       this.editor.nativeElement.innerHTML,
-      `${this.selectedKey} practice notes`
+      `${this.selectedKey} practice notes`,
+      true,
+      documentName
     );
     const blob = new Blob([documentHtml], { type: 'text/html;charset=utf-8' });
     await this.writeSavedFile(blob, suggestedName, handle);
+    this.currentDocumentName = documentName;
   }
 
   async saveDocx(): Promise<void> {
@@ -292,7 +355,12 @@ h1, h2, h3 { font-family: Georgia, serif; }
     return `${keyName || 'blues'}-practice-notes.${extension}`;
   }
 
-  private buildDocumentHtml(innerHtml: string, title: string, includeWebFonts = true): string {
+  private buildDocumentHtml(
+    innerHtml: string,
+    title: string,
+    includeWebFonts = true,
+    documentName = this.currentDocumentName
+  ): string {
     const fontLinks = includeWebFonts
       ? '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,700&display=swap" rel="stylesheet">'
       : '';
@@ -314,7 +382,7 @@ body { margin: 0; padding: 32px; color: #17130f; background: #f3ecdf; font-famil
 #practice-notes .resizable-image img { display: block; width: 100%; height: auto; object-fit: contain; }
 </style>
 </head>
-<body><main id="practice-notes">${innerHtml}</main></body>
+<body><main id="practice-notes" data-practice-key="${this.escapeAttribute(this.selectedKey)}" data-chord-mode="${this.escapeAttribute(this.chordMode)}" data-document-name="${this.escapeAttribute(documentName)}">${innerHtml}</main></body>
 </html>`;
   }
 
@@ -445,6 +513,23 @@ body { margin: 0; padding: 32px; color: #17130f; background: #f3ecdf; font-famil
       });
     });
     return parsed.querySelector('#practice-notes')?.innerHTML ?? parsed.body.innerHTML;
+  }
+
+  private restorePracticeContext(key?: string, mode?: string): void {
+    if (key && this.keys.some(option => option.label === key)) {
+      this.selectedKeyChange.emit(key);
+    }
+    if (mode === 'major' || mode === 'minor' || mode === 'seventh') {
+      this.chordModeChange.emit(mode);
+    }
+  }
+
+  private escapeAttribute(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
   private escapeHtml(value: string): string {
