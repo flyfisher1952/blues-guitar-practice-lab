@@ -174,7 +174,7 @@ main { min-height: calc(100vh - 196px); }
 .rich-editor p { margin: 0; }
 .rich-editor:focus { outline: 3px solid var(--amber); outline-offset: 2px; }
 .rich-editor h2, .rich-editor h3 { font-family: "Newsreader", serif; }
-.rich-editor .resizable-image { width: 100px; min-width: 40px; max-width: 100%; margin: 2px; display: inline-block; overflow: auto; resize: horizontal; vertical-align: top; border: 2px solid transparent; }
+.rich-editor .resizable-image { width: 100px; min-width: 40px; max-width: 100%; margin: 2px; display: inline-block; overflow: hidden; resize: horizontal; vertical-align: top; border: 2px solid transparent; }
 .rich-editor .resizable-image:hover, .rich-editor .resizable-image:focus-within { border-color: var(--amber); }
 .rich-editor .resizable-image img { width: 100%; height: auto; display: block; object-fit: contain; }
 
