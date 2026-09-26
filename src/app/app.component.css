@@ -114,6 +114,42 @@ main { min-height: calc(100vh - 176px); }
 .session-monitor > footer { padding: 10px 12px; display: flex; justify-content: flex-end; color: inherit; background: #e7dccb; border-top: 1px solid var(--line); font-size: inherit; letter-spacing: normal; }
 .reset-session { min-height: 34px; padding: 0 12px; border: 1px solid var(--red); color: var(--red); background: transparent; font-weight: 700; cursor: pointer; }
 
+.add-segment-button { width: 34px; min-height: 34px; padding: 0 !important; color: white; border-color: var(--red) !important; background: var(--red) !important; border-radius: 50%; font-size: 1.15rem; line-height: 1; }
+.timer-icon-controls { gap: 3px; }
+.timer-icon-controls button {
+  width: 29px;
+  min-height: 29px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  color: white;
+  font-size: .72rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.timer-icon-controls .timer-start { background: #2f7d45; border-color: #246538; }
+.timer-icon-controls .timer-pause { background: #c27a1a; border-color: #9e6213; }
+.timer-icon-controls .timer-stop { background: #9d2d24; border-color: #7e241d; }
+.timer-icon-controls .timer-clear { color: #332d27; background: #d7caba; border-color: #9b8e80; }
+.timer-icon-controls button:disabled { opacity: .3; cursor: not-allowed; filter: grayscale(.35); }
+.segment-remove { font-size: .9rem; filter: grayscale(1); }
+.add-segment-backdrop { padding: 24px; position: fixed; inset: 0; z-index: 110; display: grid; place-items: center; background: rgba(23, 19, 15, .55); }
+.add-segment-dialog { width: min(460px, 100%); color: var(--ink); background: #fffdf8; border: 1px solid #5f564c; box-shadow: 0 20px 60px rgba(23, 19, 15, .4); }
+.add-segment-dialog > header { padding: 16px 18px 13px; display: flex; align-items: start; justify-content: space-between; background: #e7dccb; border-bottom: 1px solid var(--line); }
+.add-segment-dialog h2 { margin: 0; font: 1.65rem/1 "Newsreader", serif; }
+.add-segment-dialog > header button { width: 32px; min-height: 32px; border: 0; background: transparent; font-size: 1.5rem; cursor: pointer; }
+.add-segment-fields { padding: 18px; display: grid; gap: 14px; }
+.add-segment-fields > label { display: grid; gap: 5px; color: #61584f; font-size: .74rem; font-weight: 700; letter-spacing: .04em; }
+.add-segment-fields input, .add-segment-fields textarea { width: 100%; min-height: 38px; padding: 7px 9px; border: 1px solid #8c8073; color: var(--ink); background: white; resize: vertical; }
+.dialog-duration { display: flex; align-items: center; gap: 8px; }
+.dialog-duration input { width: 90px; }
+.dialog-duration small { color: var(--muted); }
+.add-segment-dialog > footer { padding: 12px 18px; display: flex; justify-content: flex-end; gap: 8px; color: inherit; background: #e7dccb; border-top: 1px solid var(--line); font-size: inherit; letter-spacing: normal; }
+.add-segment-dialog > footer button { min-height: 36px; padding: 0 13px; border: 1px solid #8c8073; background: #fffdf8; font-weight: 700; cursor: pointer; }
+.add-segment-dialog > footer button.primary { color: white; border-color: var(--red); background: var(--red); }
+.add-segment-dialog > footer button:disabled { opacity: .45; cursor: not-allowed; }
+
 .session-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); }
 .session-card { min-height: 250px; padding: 24px; position: relative; display: flex; flex-direction: column; align-items: flex-start; text-align: left; border: 0; border-right: 1px solid var(--line); color: var(--ink); background: transparent; cursor: pointer; }
 .session-card:last-child { border-right: 0; }
