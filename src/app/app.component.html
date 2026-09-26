@@ -45,10 +45,12 @@
     <app-build-loop
       [selectedKey]="loopKey()"
       [keys]="keys"
+      [mode]="loopMode()"
       [groove]="groove()"
       [grooveStyle]="grooveStyle()"
       [tempo]="tempo()"
       (selectedKeyChange)="changeLoopKey($event)"
+      (modeChange)="setLoopMode($event)"
       (grooveStyleChange)="setGroove($event)"
       (tempoChange)="changeTempo($event)" />
   }
