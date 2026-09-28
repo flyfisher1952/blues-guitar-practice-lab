@@ -74,7 +74,7 @@ main { min-height: calc(100vh - 176px); }
 .session-number-input small { color: var(--muted); text-transform: none; }
 .plan-balance.warning { color: var(--red); background: rgba(157, 45, 36, .08); }
 .session-workspace { display: grid; grid-template-columns: minmax(15vw, 230px) minmax(0, 1fr); gap: 12px; align-items: start; }
-.session-layout { min-width: 0; display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, .85fr); gap: 12px; align-items: start; }
+.session-layout { min-width: 0; display: grid; grid-template-columns: minmax(0, 2fr) minmax(350px, .95fr); gap: 12px; align-items: start; }
 .saved-practice-sessions { min-width: 15vw; border: 1px solid var(--line); background: #fffdf8; }
 .saved-practice-sessions > header { padding: 12px 14px; border-bottom: 1px solid var(--line); background: #e7dccb; }
 .saved-practice-empty { margin: 0; padding: 16px 14px; color: var(--muted); font-size: .76rem; line-height: 1.4; }
@@ -139,6 +139,27 @@ main { min-height: calc(100vh - 176px); }
 .activity-totals span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .practice-history h3 { margin: 12px 14px 5px; color: var(--muted); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; }
 .recent-history > div:last-child { border-bottom: 0; }
+.practice-calendar { padding: 12px; border-bottom: 1px solid var(--line); }
+.calendar-range { margin-bottom: 9px; color: var(--muted); font-size: .72rem; font-weight: 700; text-align: center; }
+.calendar-weekdays, .calendar-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.calendar-weekdays { margin-bottom: 4px; }
+.calendar-weekdays span { color: var(--muted); font-size: .58rem; font-weight: 700; text-align: center; text-transform: uppercase; }
+.calendar-days button { min-width: 0; height: 34px; padding: 2px; position: relative; border: 1px solid #d4c8b8; color: var(--ink); background: #fffdf8; font-size: .72rem; cursor: pointer; }
+.calendar-days button:hover { border-color: var(--red); background: #f5efe5; }
+.calendar-days button.today { box-shadow: inset 0 0 0 1px var(--amber); }
+.calendar-days button.selected { color: white; border-color: var(--red); background: var(--red); }
+.calendar-days button strong { position: absolute; right: 3px; bottom: 1px; color: #23733b; font-size: .72rem; }
+.calendar-days button.selected strong { color: #c9f0d2; }
+.practice-chart { padding: 11px 12px 13px; border-bottom: 1px solid var(--line); }
+.chart-heading { margin-bottom: 7px; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.practice-chart .chart-heading h3 { margin: 0; }
+.chart-heading span { color: var(--muted); font-size: .62rem; }
+.chart-body { height: 145px; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 5px; }
+.chart-axis { padding: 0 0 14px; display: flex; flex-direction: column; justify-content: space-between; color: var(--muted); font-size: .56rem; text-align: right; }
+.chart-grid { padding-top: 3px; display: grid; grid-template-columns: repeat(28, minmax(2px, 1fr)); align-items: end; gap: 2px; border-bottom: 1px solid #8c8073; background: repeating-linear-gradient(to bottom, transparent 0, transparent calc(50% - 1px), rgba(140, 128, 115, .2) 50%, transparent calc(50% + 1px)); }
+.chart-grid button { height: 100%; min-width: 0; padding: 0; display: flex; align-items: flex-end; border: 0; background: transparent; cursor: pointer; }
+.chart-bar { width: 100%; min-height: 0; display: block; background: #23733b; }
+.chart-grid button:hover .chart-bar, .chart-grid button.selected .chart-bar { background: var(--red); }
 .session-monitor { width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 130px); position: fixed; right: 18px; bottom: 18px; z-index: 60; overflow-y: auto; color: var(--ink); background: #fffdf8; border: 1px solid #5f564c; box-shadow: 0 18px 55px rgba(23, 19, 15, .38); }
 .session-monitor > header { padding: 12px 14px; position: sticky; top: 0; z-index: 2; display: flex; align-items: start; justify-content: space-between; background: #e7dccb; border-bottom: 1px solid var(--line); }
 .session-monitor h2 { margin: 0; font: 1.5rem/1 "Newsreader", serif; }
