@@ -79,14 +79,15 @@ main { min-height: calc(100vh - 176px); }
 .saved-practice-sessions > header { padding: 12px 14px; border-bottom: 1px solid var(--line); background: #e7dccb; }
 .saved-practice-empty { margin: 0; padding: 16px 14px; color: var(--muted); font-size: .76rem; line-height: 1.4; }
 .saved-practice-list { display: grid; }
-.saved-practice-entry { min-height: 48px; padding: 7px 8px 7px 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px; border-bottom: 1px solid var(--line); }
+.saved-practice-entry { min-height: 48px; padding: 7px 8px 7px 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px; border-bottom: 1px solid var(--line); cursor: pointer; }
 .saved-practice-entry:last-child { border-bottom: 0; }
 .saved-practice-entry.active { box-shadow: inset 4px 0 0 var(--red); background: #f5efe5; }
-.saved-practice-name { min-width: 0; padding: 6px 4px; overflow: hidden; border: 0; color: var(--ink); background: transparent; font: inherit; font-size: .78rem; font-weight: 700; text-align: left; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.saved-practice-entry:hover { background: #f5efe5; }
+.saved-practice-name { width: 100%; min-width: 0; padding: 6px 4px; overflow: visible; border: 0; color: var(--ink); background: transparent; font: inherit; font-size: .78rem; font-weight: 700; line-height: 1.3; text-align: left; white-space: normal; overflow-wrap: anywhere; cursor: pointer; }
 .saved-practice-name:hover { color: var(--red); text-decoration: underline; text-underline-offset: 3px; }
 .saved-practice-name:focus-visible { outline: 2px solid var(--amber); outline-offset: 1px; }
 .saved-practice-entry > div { display: flex; gap: 2px; }
-.saved-practice-entry button { width: 28px; min-height: 28px; }
+.saved-practice-entry > div button { width: 28px; min-height: 28px; }
 .saved-practice-entry svg { width: 17px; height: 17px; }
 .delete-practice-button svg { fill: #9d2d24; }
 .session-plan-card, .practice-history { border: 1px solid var(--line); background: #fffdf8; }
