@@ -64,12 +64,11 @@
             type="text"
             [value]="practiceName"
             [readOnly]="!practiceNameEditing"
+            title="Click to edit practice name"
             (input)="practiceName = $any($event.target).value"
+            (click)="editPracticeName(practiceNameInput)"
             (blur)="finishPracticeNameEdit($any($event.target).value)"
             (keydown.enter)="finishPracticeNameEdit($any($event.target).value); $any($event.target).blur()">
-          <button class="edit-practice-name-button icon-only-button" type="button" title="Edit practice name" aria-label="Edit practice name" (click)="editPracticeName(practiceNameInput)">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16.5-.5 4 4-.5L18.8 8.7l-3.5-3.5zM17 3.5l3.5 3.5 1-1a1.4 1.4 0 0 0 0-2l-1.5-1.5a1.4 1.4 0 0 0-2 0z"/></svg>
-          </button>
           <h2 id="segments-heading" class="visually-hidden">Practice session divisions</h2>
         </div>
         <div class="session-plan-actions">
