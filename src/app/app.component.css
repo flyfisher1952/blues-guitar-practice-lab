@@ -104,9 +104,9 @@ main { min-height: calc(100vh - 176px); }
 .new-session-button svg { width: 23px; height: 23px; fill: var(--red); }
 .save-practice-button { width: 34px; min-height: 34px; }
 .save-practice-button svg { width: 22px; height: 22px; fill: #23733b; }
-.add-division-box { width: 24px; height: 24px; min-height: 0; margin: 7px 12px 9px 38px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #8c8073; color: var(--ink); background: #f3ecdf; line-height: 0; cursor: pointer; }
+.add-division-box { width: 17px; height: 17px; min-height: 0; margin: 7px 12px 9px 41px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #8c8073; color: var(--ink); background: #f3ecdf; line-height: 0; cursor: pointer; }
 .add-division-box:hover { border-color: var(--red); background: #ebe0cf; }
-.add-division-box svg { width: 13px; height: 13px; display: block; flex: none; fill: var(--red); }
+.add-division-box svg { width: 11px; height: 11px; display: block; flex: none; fill: var(--red); }
 .segment-editor-list { display: grid; }
 .segment-editor { min-height: 58px; padding: 7px 9px; display: grid; grid-template-columns: 24px 42px minmax(130px, 1fr) 72px 66px auto 30px; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); }
 .segment-editor:last-child { border-bottom: 0; }
@@ -121,7 +121,10 @@ main { min-height: calc(100vh - 176px); }
 .segment-number { color: var(--red); font-weight: 800; }
 .segment-name { min-width: 0; display: grid; gap: 2px; }
 .segment-name input { width: 100%; min-height: 32px; padding: 0 7px; border: 1px solid transparent; background: transparent; font-weight: 700; }
-.segment-name input:hover, .segment-name input:focus { border-color: #8c8073; background: white; }
+.segment-name input[readonly] { cursor: text; }
+.segment-name input:hover, .segment-name input:focus, .segment-name input:not([readonly]) { border-color: #8c8073; background: white; }
+.segment-name input.segment-hint-input { min-height: 23px; color: var(--muted); font-size: .68rem; font-weight: 400; }
+.segment-name input.segment-hint-input::placeholder { color: #9a9085; font-style: italic; }
 .segment-name small { overflow: hidden; color: var(--muted); font-size: .68rem; text-overflow: ellipsis; white-space: nowrap; }
 .segment-duration { display: flex; align-items: center; gap: 4px; }
 .segment-duration input { width: 48px; min-height: 32px; padding: 0 5px; border: 1px solid #8c8073; background: white; }
@@ -139,7 +142,7 @@ main { min-height: calc(100vh - 176px); }
 .activity-totals span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .practice-history h3 { margin: 12px 14px 5px; color: var(--muted); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; }
 .recent-history > div:last-child { border-bottom: 0; }
-.practice-calendar { padding: 12px; border-bottom: 1px solid var(--line); }
+.practice-calendar { padding: 18px 12px 12px; border-bottom: 1px solid var(--line); }
 .calendar-range { margin-bottom: 9px; color: var(--muted); font-size: .72rem; font-weight: 700; text-align: center; }
 .calendar-weekdays, .calendar-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
 .calendar-weekdays { margin-bottom: 4px; }
@@ -150,16 +153,21 @@ main { min-height: calc(100vh - 176px); }
 .calendar-days button.selected { color: white; border-color: var(--red); background: var(--red); }
 .calendar-days button strong { position: absolute; right: 3px; bottom: 1px; color: #23733b; font-size: .72rem; }
 .calendar-days button.selected strong { color: #c9f0d2; }
-.practice-chart { padding: 11px 12px 13px; border-bottom: 1px solid var(--line); }
+.practice-chart { padding: 18px 12px 13px; border-bottom: 1px solid var(--line); }
 .chart-heading { margin-bottom: 7px; display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .practice-chart .chart-heading h3 { margin: 0; }
 .chart-heading span { color: var(--muted); font-size: .62rem; }
-.chart-body { height: 145px; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 5px; }
-.chart-axis { padding: 0 0 14px; display: flex; flex-direction: column; justify-content: space-between; color: var(--muted); font-size: .56rem; text-align: right; }
+.chart-body { height: 165px; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 5px; }
+.chart-axis { padding: 0 0 34px; display: flex; flex-direction: column; justify-content: space-between; color: var(--muted); font-size: .56rem; text-align: right; }
+.chart-plot { min-width: 0; display: grid; grid-template-rows: minmax(0, 1fr) 34px; }
 .chart-grid { padding-top: 3px; display: grid; grid-template-columns: repeat(28, minmax(2px, 1fr)); align-items: end; gap: 2px; border-bottom: 1px solid #8c8073; background: repeating-linear-gradient(to bottom, transparent 0, transparent calc(50% - 1px), rgba(140, 128, 115, .2) 50%, transparent calc(50% + 1px)); }
 .chart-grid button { height: 100%; min-width: 0; padding: 0; display: flex; align-items: flex-end; border: 0; background: transparent; cursor: pointer; }
 .chart-bar { width: 100%; min-height: 0; display: block; background: #23733b; }
 .chart-grid button:hover .chart-bar, .chart-grid button.selected .chart-bar { background: var(--red); }
+.chart-x-labels { display: grid; grid-template-columns: repeat(28, minmax(2px, 1fr)); gap: 2px; }
+.chart-x-labels > span { min-width: 0; padding-top: 3px; display: grid; justify-items: center; color: var(--muted); font-size: .48rem; line-height: 1; }
+.chart-x-labels b { font-weight: 700; }
+.chart-x-labels small { margin-top: 4px; overflow: visible; font-size: .48rem; white-space: nowrap; }
 .session-monitor { width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 130px); position: fixed; right: 18px; bottom: 18px; z-index: 60; overflow-y: auto; color: var(--ink); background: #fffdf8; border: 1px solid #5f564c; box-shadow: 0 18px 55px rgba(23, 19, 15, .38); }
 .session-monitor > header { padding: 12px 14px; position: sticky; top: 0; z-index: 2; display: flex; align-items: start; justify-content: space-between; background: #e7dccb; border-bottom: 1px solid var(--line); }
 .session-monitor h2 { margin: 0; font: 1.5rem/1 "Newsreader", serif; }
