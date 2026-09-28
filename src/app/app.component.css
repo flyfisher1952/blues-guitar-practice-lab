@@ -104,7 +104,7 @@ main { min-height: calc(100vh - 176px); }
 .new-session-button svg { width: 23px; height: 23px; fill: var(--red); }
 .save-practice-button { width: 34px; min-height: 34px; }
 .save-practice-button svg { width: 22px; height: 22px; fill: #23733b; }
-.add-division-box { width: 24px; height: 24px; min-height: 0; margin: 7px 12px 9px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #8c8073; color: var(--ink); background: #f3ecdf; line-height: 0; cursor: pointer; }
+.add-division-box { width: 24px; height: 24px; min-height: 0; margin: 7px 12px 9px 38px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #8c8073; color: var(--ink); background: #f3ecdf; line-height: 0; cursor: pointer; }
 .add-division-box:hover { border-color: var(--red); background: #ebe0cf; }
 .add-division-box svg { width: 13px; height: 13px; display: block; flex: none; fill: var(--red); }
 .segment-editor-list { display: grid; }
