@@ -103,9 +103,9 @@ main { min-height: calc(100vh - 176px); }
 .new-session-button svg { width: 23px; height: 23px; fill: var(--red); }
 .save-practice-button { width: 34px; min-height: 34px; }
 .save-practice-button svg { width: 22px; height: 22px; fill: #23733b; }
-.add-division-box { width: 24px; min-height: 24px; margin: 7px 12px 9px; padding: 0; display: grid; place-items: center; border: 1px solid #8c8073; color: var(--ink); background: #f3ecdf; cursor: pointer; }
+.add-division-box { width: 24px; height: 24px; min-height: 0; margin: 7px 12px 9px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #8c8073; color: var(--ink); background: #f3ecdf; line-height: 0; cursor: pointer; }
 .add-division-box:hover { border-color: var(--red); background: #ebe0cf; }
-.add-division-box svg { width: 13px; height: 13px; fill: var(--red); }
+.add-division-box svg { width: 13px; height: 13px; display: block; flex: none; fill: var(--red); }
 .segment-editor-list { display: grid; }
 .segment-editor { min-height: 58px; padding: 7px 9px; display: grid; grid-template-columns: 24px 42px minmax(130px, 1fr) 72px 66px auto 30px; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); }
 .segment-editor:last-child { border-bottom: 0; }
