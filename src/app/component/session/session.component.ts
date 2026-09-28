@@ -14,6 +14,7 @@ interface PracticeSegment {
 interface PracticeDay {
   date: string;
   segments: Record<string, number>;
+  sessions?: SavedPracticeSession[];
 }
 
 interface SavedPracticeSession {
@@ -38,6 +39,7 @@ export class SessionComponent implements OnInit, OnDestroy {
   segments: PracticeSegment[] = [];
   savedSessions: SavedPracticeSession[] = [];
   history: PracticeDay[] = [];
+  selectedDate = this.localDateKey(new Date());
   monitorOpen = false;
   addSegmentOpen = false;
   newSegmentName = '';
@@ -76,17 +78,22 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   get allTimeSeconds(): number {
-    return this.history.reduce(
-      (total, day) => total + Object.values(day.segments).reduce((sum, seconds) => sum + seconds, 0),
-      0
-    );
+    return this.history.reduce((total, day) => total + this.dayTotal(day), 0);
   }
 
   get activityTotals(): Array<{ name: string; seconds: number }> {
     const totals = new Map<string, number>();
     for (const day of this.history) {
-      for (const [name, seconds] of Object.entries(day.segments)) {
-        totals.set(name, (totals.get(name) ?? 0) + seconds);
+      if (day.sessions?.length) {
+        for (const session of day.sessions) {
+          for (const segment of session.segments) {
+            totals.set(segment.name, (totals.get(segment.name) ?? 0) + segment.elapsedSeconds);
+          }
+        }
+      } else {
+        for (const [name, seconds] of Object.entries(day.segments)) {
+          totals.set(name, (totals.get(name) ?? 0) + seconds);
+        }
       }
     }
     return Array.from(totals, ([name, seconds]) => ({ name, seconds }))
@@ -95,6 +102,56 @@ export class SessionComponent implements OnInit, OnDestroy {
 
   get recentHistory(): PracticeDay[] {
     return [...this.history].sort((left, right) => right.date.localeCompare(left.date)).slice(0, 7);
+  }
+
+  get calendarDays(): Array<{ date: string; dayNumber: number; isToday: boolean; hasPractice: boolean }> {
+    const today = new Date();
+    const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    start.setDate(start.getDate() - start.getDay() - 14);
+    return Array.from({ length: 28 }, (_, index) => {
+      const date = new Date(start);
+      date.setDate(start.getDate() + index);
+      const key = this.localDateKey(date);
+      return {
+        date: key,
+        dayNumber: date.getDate(),
+        isToday: key === this.localDateKey(today),
+        hasPractice: this.daySeconds(key) > 0
+      };
+    });
+  }
+
+  get calendarRangeLabel(): string {
+    const days = this.calendarDays;
+    return days.length ? `${this.formatCalendarDate(days[0].date)} – ${this.formatCalendarDate(days[days.length - 1].date)}` : '';
+  }
+
+  get chartMaximumMinutes(): number {
+    const mostMinutes = Math.max(0, ...this.calendarDays.map(day => this.daySeconds(day.date) / 60));
+    return Math.max(30, Math.ceil(mostMinutes) + 5);
+  }
+
+  get displayedSavedSessions(): SavedPracticeSession[] {
+    const daily = this.findDay(this.selectedDate)?.sessions;
+    if (daily?.length) return daily;
+    return this.selectedDate === this.localDateKey(new Date()) ? this.savedSessions : [];
+  }
+
+  selectPracticeDay(date: string): void {
+    this.stopClock();
+    this.selectedDate = date;
+    const sessions = this.findDay(date)?.sessions ?? [];
+    const selected = sessions.find(session => session.id === this.activeSavedSessionId) ?? sessions[0];
+    if (selected) this.loadPracticeSession(selected);
+    else this.activeSavedSessionId = undefined;
+  }
+
+  chartBarHeight(date: string): number {
+    return Math.min(100, (this.daySeconds(date) / 60 / this.chartMaximumMinutes) * 100);
+  }
+
+  chartMinutes(date: string): number {
+    return Math.round(this.daySeconds(date) / 60);
   }
 
   setTotalMinutes(value: number): void {
@@ -164,6 +221,7 @@ export class SessionComponent implements OnInit, OnDestroy {
     this.activeSavedSessionId = saved.id;
     this.practiceName = saved.name;
     this.persistSavedSessions();
+    this.persistSelectedDaySession();
     this.persistPlan();
   }
 
@@ -172,10 +230,11 @@ export class SessionComponent implements OnInit, OnDestroy {
     this.activeSavedSessionId = saved.id;
     this.practiceName = saved.name;
     this.totalMinutes = this.clamp(saved.totalMinutes, 1, 480, 20);
+    const isDailySession = Boolean(this.findDay(this.selectedDate)?.sessions?.some(session => session.id === saved.id));
     this.segments = saved.segments.map(segment => ({
       ...segment,
-      done: false,
-      elapsedSeconds: 0,
+      done: isDailySession ? Boolean(segment.done) : false,
+      elapsedSeconds: isDailySession ? Math.max(0, segment.elapsedSeconds) : 0,
       plannedMinutes: this.clamp(segment.plannedMinutes, 1, 240, 5)
     }));
     this.syncTotalDuration();
@@ -185,8 +244,11 @@ export class SessionComponent implements OnInit, OnDestroy {
   deletePracticeSession(saved: SavedPracticeSession): void {
     if (!window.confirm(`Delete the saved practice session "${saved.name}"? This cannot be undone.`)) return;
     this.savedSessions = this.savedSessions.filter(session => session.id !== saved.id);
+    const day = this.findDay(this.selectedDate);
+    if (day?.sessions) day.sessions = day.sessions.filter(session => session.id !== saved.id);
     if (this.activeSavedSessionId === saved.id) this.activeSavedSessionId = undefined;
     this.persistSavedSessions();
+    this.persistHistory();
     this.persistPlan();
   }
 
@@ -290,6 +352,7 @@ export class SessionComponent implements OnInit, OnDestroy {
   resetSegment(segment: PracticeSegment): void {
     if (this.activeSegmentId === segment.id) this.stopClock(true);
     segment.elapsedSeconds = 0;
+    this.persistPlan();
   }
 
   resetSession(): void {
@@ -338,6 +401,12 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   dayTotal(day: PracticeDay): number {
+    if (day.sessions?.length) {
+      return day.sessions.reduce(
+        (total, session) => total + session.segments.reduce((sum, segment) => sum + segment.elapsedSeconds, 0),
+        0
+      );
+    }
     return Object.values(day.segments).reduce((sum, seconds) => sum + seconds, 0);
   }
 
@@ -353,15 +422,14 @@ export class SessionComponent implements OnInit, OnDestroy {
   }
 
   private recordSecond(segmentName: string): void {
-    const now = new Date();
-    const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    let day = this.history.find(entry => entry.date === date);
+    let day = this.findDay(this.selectedDate);
     if (!day) {
-      day = { date, segments: {} };
+      day = { date: this.selectedDate, segments: {}, sessions: [] };
       this.history = [...this.history, day];
     }
     day.segments[segmentName] = (day.segments[segmentName] ?? 0) + 1;
-    localStorage.setItem(this.historyKey, JSON.stringify(this.history));
+    this.persistSelectedDaySession();
+    this.persistHistory();
   }
 
   private restorePlan(): void {
@@ -434,10 +502,54 @@ export class SessionComponent implements OnInit, OnDestroy {
       activeSavedSessionId: this.activeSavedSessionId,
       segments
     }));
+    this.persistSelectedDaySession();
   }
 
   private persistSavedSessions(): void {
     localStorage.setItem(this.savedSessionsKey, JSON.stringify(this.savedSessions));
+  }
+
+  private persistSelectedDaySession(): void {
+    if (!this.activeSavedSessionId) return;
+    let day = this.findDay(this.selectedDate);
+    if (!day) {
+      day = { date: this.selectedDate, segments: {}, sessions: [] };
+      this.history = [...this.history, day];
+    }
+    const dailySession: SavedPracticeSession = {
+      id: this.activeSavedSessionId,
+      name: this.practiceName.trim() || 'My Practice Session',
+      totalMinutes: this.totalMinutes,
+      segments: this.segments.map(segment => ({ ...segment }))
+    };
+    const sessions = day.sessions ?? [];
+    day.sessions = sessions.some(session => session.id === dailySession.id)
+      ? sessions.map(session => session.id === dailySession.id ? dailySession : session)
+      : [...sessions, dailySession];
+    this.persistHistory();
+  }
+
+  private persistHistory(): void {
+    localStorage.setItem(this.historyKey, JSON.stringify(this.history));
+  }
+
+  private findDay(date: string): PracticeDay | undefined {
+    return this.history.find(day => day.date === date);
+  }
+
+  private daySeconds(date: string): number {
+    const day = this.findDay(date);
+    return day ? this.dayTotal(day) : 0;
+  }
+
+  private localDateKey(date: Date): string {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
+  private formatCalendarDate(date: string): string {
+    const [year, month, day] = date.split('-').map(Number);
+    return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+      .format(new Date(year, month - 1, day));
   }
 
   private copySegmentsForStorage(segments: PracticeSegment[]): PracticeSegment[] {
