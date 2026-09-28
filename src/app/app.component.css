@@ -95,9 +95,8 @@ main { min-height: calc(100vh - 176px); }
 .practice-name-row { display: flex; align-items: center; gap: 6px; }
 .practice-name-row label { font-weight: 800; }
 .practice-name-row input { width: min(450px, 45vw); min-height: 32px; padding: 0 7px; border: 0; border-bottom: 2px solid var(--red); color: var(--ink); background: transparent; font-weight: 700; }
+.practice-name-row input[readonly] { cursor: text; }
 .practice-name-row input:not([readonly]) { background: white; outline: 1px solid #8c8073; outline-offset: -1px; }
-.edit-practice-name-button { width: 30px; min-height: 30px !important; }
-.edit-practice-name-button svg { width: 17px; height: 17px; fill: #766d62; }
 .session-plan-actions { display: flex; align-items: center; gap: 3px; }
 .new-session-button { width: 34px; min-height: 34px; }
 .new-session-button svg { width: 23px; height: 23px; fill: var(--red); }
