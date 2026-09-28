@@ -32,11 +32,11 @@
         <p class="eyebrow">SAVED PRACTICES</p>
         <h2 id="saved-practices-heading" class="visually-hidden">Saved practice sessions</h2>
       </header>
-      @if (!savedSessions.length) {
-        <p class="saved-practice-empty">Saved practice sessions will appear here.</p>
+      @if (!displayedSavedSessions.length) {
+        <p class="saved-practice-empty">No practice sessions were saved for this day.</p>
       } @else {
         <div class="saved-practice-list">
-          @for (saved of savedSessions; track saved.id) {
+          @for (saved of displayedSavedSessions; track saved.id) {
             <div class="saved-practice-entry" [class.active]="saved.id === activeSavedSessionId" title="Load practice session" (click)="loadPracticeSession(saved)">
               <button class="saved-practice-name" type="button" [attr.aria-label]="'Load ' + saved.name">{{ saved.name }}</button>
               <div>
@@ -147,21 +147,50 @@
         }
       </header>
 
+      <section class="practice-calendar" aria-label="Four-week practice calendar">
+        <div class="calendar-range">{{ calendarRangeLabel }}</div>
+        <div class="calendar-weekdays" aria-hidden="true">
+          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
+        <div class="calendar-days">
+          @for (day of calendarDays; track day.date) {
+            <button
+              type="button"
+              [class.selected]="day.date === selectedDate"
+              [class.today]="day.isToday"
+              [class.practiced]="day.hasPractice"
+              [attr.aria-label]="day.date + (day.hasPractice ? ', practice recorded' : '')"
+              (click)="selectPracticeDay(day.date)">
+              <span>{{ day.dayNumber }}</span>
+              @if (day.hasPractice) { <strong aria-hidden="true">✓</strong> }
+            </button>
+          }
+        </div>
+      </section>
+
+      <section class="practice-chart" aria-label="Practice minutes by day">
+        <div class="chart-heading">
+          <h3>Minutes practiced</h3>
+          <span>0–{{ chartMaximumMinutes }} min</span>
+        </div>
+        <div class="chart-body">
+          <div class="chart-axis"><span>{{ chartMaximumMinutes }}</span><span>{{ chartMaximumMinutes / 2 | number:'1.0-0' }}</span><span>0</span></div>
+          <div class="chart-grid">
+            @for (day of calendarDays; track day.date) {
+              <button type="button" [class.selected]="day.date === selectedDate" [title]="day.date + ': ' + chartMinutes(day.date) + ' minutes'" (click)="selectPracticeDay(day.date)">
+                <span class="chart-bar" [style.height.%]="chartBarHeight(day.date)"></span>
+              </button>
+            }
+          </div>
+        </div>
+      </section>
+
       @if (!history.length) {
-        <p class="history-empty">Recorded practice time will appear here after you start a segment.</p>
+        <p class="history-empty">Recorded practice time will appear here after you start a division.</p>
       } @else {
         <div class="activity-totals">
           @for (activity of activityTotals; track activity.name) {
             <div><span>{{ activity.name }}</span><strong>{{ formatDuration(activity.seconds) }}</strong></div>
-          }
-        </div>
-        <h3>Recent days</h3>
-        <div class="recent-history">
-          @for (day of recentHistory; track day.date) {
-            <div>
-              <strong>{{ day.date }}</strong>
-              <span>{{ formatDuration(dayTotal(day)) }}</span>
-            </div>
           }
         </div>
       }
