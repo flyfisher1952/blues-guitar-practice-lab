@@ -132,6 +132,22 @@ export class SessionComponent implements OnInit, OnDestroy {
     this.persistPlan();
   }
 
+  newPracticeSession(): void {
+    this.stopClock();
+    this.activeSavedSessionId = undefined;
+    this.practiceName = 'New Session';
+    this.totalMinutes = 5;
+    this.segments = [{
+      id: crypto.randomUUID?.() ?? `segment-${Date.now()}`,
+      name: 'Warm up',
+      description: '',
+      done: false,
+      plannedMinutes: 5,
+      elapsedSeconds: 0
+    }];
+    this.persistPlan();
+  }
+
   savePracticeSession(): void {
     const saved: SavedPracticeSession = {
       id: this.activeSavedSessionId ?? (crypto.randomUUID?.() ?? `practice-${Date.now()}`),
