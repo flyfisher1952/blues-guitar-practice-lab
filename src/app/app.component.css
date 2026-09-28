@@ -73,11 +73,35 @@ main { min-height: calc(100vh - 176px); }
 .session-number-input input { width: 76px; min-height: 34px; padding: 0 7px; border: 1px solid #8c8073; background: #fffdf8; }
 .session-number-input small { color: var(--muted); text-transform: none; }
 .plan-balance.warning { color: var(--red); background: rgba(157, 45, 36, .08); }
-.session-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, .85fr); gap: 12px; align-items: start; }
+.session-workspace { display: grid; grid-template-columns: minmax(15vw, 230px) minmax(0, 1fr); gap: 12px; align-items: start; }
+.session-layout { min-width: 0; display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, .85fr); gap: 12px; align-items: start; }
+.saved-practice-sessions { min-width: 15vw; border: 1px solid var(--line); background: #fffdf8; }
+.saved-practice-sessions > header { padding: 12px 14px; border-bottom: 1px solid var(--line); background: #e7dccb; }
+.saved-practice-sessions h2 { margin: 0; font: 1.25rem/1 "Newsreader", serif; }
+.saved-practice-empty { margin: 0; padding: 16px 14px; color: var(--muted); font-size: .76rem; line-height: 1.4; }
+.saved-practice-list { display: grid; }
+.saved-practice-entry { min-height: 48px; padding: 7px 8px 7px 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px; border-bottom: 1px solid var(--line); }
+.saved-practice-entry:last-child { border-bottom: 0; }
+.saved-practice-entry.active { box-shadow: inset 4px 0 0 var(--red); background: #f5efe5; }
+.saved-practice-entry > span { overflow: hidden; font-size: .78rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.saved-practice-entry > div { display: flex; gap: 2px; }
+.saved-practice-entry button { width: 28px; min-height: 28px; }
+.saved-practice-entry svg { width: 17px; height: 17px; }
+.load-practice-button svg { fill: #23733b; }
+.delete-practice-button svg { fill: #9d2d24; }
 .session-plan-card, .practice-history { border: 1px solid var(--line); background: #fffdf8; }
 .session-plan-card > header, .practice-history > header { padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: #e7dccb; }
 .session-plan-card h2, .practice-history h2 { margin: 0; font: 1.4rem/1 "Newsreader", serif; }
 .session-plan-card > header button { min-height: 34px; padding: 0 12px; border: 1px solid var(--ink); background: transparent; font-weight: 700; cursor: pointer; }
+.practice-name-row { display: flex; align-items: center; gap: 6px; }
+.practice-name-row label { font-weight: 800; }
+.practice-name-row input { width: 150px; min-height: 32px; padding: 0 7px; border: 1px solid transparent; color: var(--ink); background: transparent; font-weight: 700; }
+.practice-name-row input:not([readonly]) { border-color: #8c8073; background: white; }
+.edit-practice-name-button { width: 30px; min-height: 30px !important; }
+.edit-practice-name-button svg { width: 17px; height: 17px; fill: #766d62; }
+.session-plan-actions { display: flex; align-items: center; gap: 3px; }
+.save-practice-button { width: 34px; min-height: 34px; }
+.save-practice-button svg { width: 22px; height: 22px; fill: #23733b; }
 .segment-editor-list { display: grid; }
 .segment-editor { min-height: 58px; padding: 7px 9px; display: grid; grid-template-columns: 24px 42px minmax(130px, 1fr) 72px 66px auto 30px; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); }
 .segment-editor:last-child { border-bottom: 0; }
@@ -544,6 +568,8 @@ main { min-height: calc(100vh - 176px); }
 footer { padding: 24px clamp(20px, 5vw, 72px); display: flex; justify-content: space-between; color: #a99d90; background: var(--ink); font-size: .7rem; letter-spacing: .1em; }
 
 @media (max-width: 1000px) {
+  .session-workspace { grid-template-columns: 1fr; }
+  .saved-practice-sessions { min-width: 0; }
   .session-layout { grid-template-columns: 1fr; }
   .segment-editor { grid-template-columns: 24px 42px minmax(130px, 1fr) 72px 66px auto 30px; }
   .triad-panel { height: auto; min-height: calc(100vh - 104px); overflow: visible; }
