@@ -36,6 +36,8 @@ export class SessionComponent implements OnInit, OnDestroy {
   totalMinutes = 20;
   practiceName = 'My Practice Session';
   practiceNameEditing = false;
+  editingSegmentNameId?: string;
+  editingSegmentHintId?: string;
   segments: PracticeSegment[] = [];
   savedSessions: SavedPracticeSession[] = [];
   history: PracticeDay[] = [];
@@ -154,6 +156,16 @@ export class SessionComponent implements OnInit, OnDestroy {
     return Math.round(this.daySeconds(date) / 60);
   }
 
+  weekdayInitial(date: string): string {
+    const [year, month, day] = date.split('-').map(Number);
+    return ['S', 'M', 'T', 'W', 'T', 'F', 'S'][new Date(year, month - 1, day).getDay()];
+  }
+
+  shortDate(date: string): string {
+    const [, month, day] = date.split('-').map(Number);
+    return `${month}/${day}`;
+  }
+
   setTotalMinutes(value: number): void {
     this.totalMinutes = this.clamp(value, 1, 480, 20);
     this.persistPlan();
@@ -161,7 +173,23 @@ export class SessionComponent implements OnInit, OnDestroy {
 
   updateSegmentName(segment: PracticeSegment, value: string): void {
     segment.name = value.trim() || 'Practice segment';
+    this.editingSegmentNameId = undefined;
     this.persistPlan();
+  }
+
+  updateSegmentHint(segment: PracticeSegment, value: string): void {
+    segment.description = value.trim();
+    this.editingSegmentHintId = undefined;
+    this.persistPlan();
+  }
+
+  editSegmentField(input: HTMLInputElement, segmentId: string, field: 'name' | 'hint'): void {
+    if (field === 'name') this.editingSegmentNameId = segmentId;
+    else this.editingSegmentHintId = segmentId;
+    window.setTimeout(() => {
+      input.focus();
+      input.select();
+    });
   }
 
   updateSegmentMinutes(segment: PracticeSegment, value: number): void {
