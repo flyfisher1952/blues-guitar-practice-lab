@@ -102,8 +102,26 @@
             </label>
             <label class="segment-name">
               <span class="visually-hidden">Division name</span>
-              <input type="text" [value]="segment.name" (change)="updateSegmentName(segment, $any($event.target).value)">
-              @if (segment.description) { <small>{{ segment.description }}</small> }
+              <input
+                #segmentNameInput
+                type="text"
+                [value]="segment.name"
+                [readOnly]="editingSegmentNameId !== segment.id"
+                title="Click to edit division name"
+                (click)="editSegmentField(segmentNameInput, segment.id, 'name')"
+                (blur)="updateSegmentName(segment, $any($event.target).value)"
+                (keydown.enter)="updateSegmentName(segment, $any($event.target).value); $any($event.target).blur()">
+              <input
+                #segmentHintInput
+                class="segment-hint-input"
+                type="text"
+                [value]="segment.description"
+                [readOnly]="editingSegmentHintId !== segment.id"
+                placeholder="Add hint text"
+                title="Click to edit division hint"
+                (click)="editSegmentField(segmentHintInput, segment.id, 'hint')"
+                (blur)="updateSegmentHint(segment, $any($event.target).value)"
+                (keydown.enter)="updateSegmentHint(segment, $any($event.target).value); $any($event.target).blur()">
             </label>
             <label class="segment-duration">
               <span class="visually-hidden">Duration in minutes</span>
@@ -175,12 +193,19 @@
         </div>
         <div class="chart-body">
           <div class="chart-axis"><span>{{ chartMaximumMinutes }}</span><span>{{ chartMaximumMinutes / 2 | number:'1.0-0' }}</span><span>0</span></div>
-          <div class="chart-grid">
-            @for (day of calendarDays; track day.date) {
-              <button type="button" [class.selected]="day.date === selectedDate" [title]="day.date + ': ' + chartMinutes(day.date) + ' minutes'" (click)="selectPracticeDay(day.date)">
-                <span class="chart-bar" [style.height.%]="chartBarHeight(day.date)"></span>
-              </button>
-            }
+          <div class="chart-plot">
+            <div class="chart-grid">
+              @for (day of calendarDays; track day.date) {
+                <button type="button" [class.selected]="day.date === selectedDate" [title]="day.date + ': ' + chartMinutes(day.date) + ' minutes'" (click)="selectPracticeDay(day.date)">
+                  <span class="chart-bar" [style.height.%]="chartBarHeight(day.date)"></span>
+                </button>
+              }
+            </div>
+            <div class="chart-x-labels" aria-hidden="true">
+              @for (day of calendarDays; track day.date; let index = $index) {
+                <span><b>{{ weekdayInitial(day.date) }}</b><small>{{ index % 7 === 0 ? shortDate(day.date) : '' }}</small></span>
+              }
+            </div>
           </div>
         </div>
       </section>
