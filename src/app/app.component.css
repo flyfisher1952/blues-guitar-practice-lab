@@ -94,7 +94,7 @@ main { min-height: calc(100vh - 176px); }
 .session-plan-card > header button { min-height: 34px; padding: 0 12px; border: 1px solid var(--ink); background: transparent; font-weight: 700; cursor: pointer; }
 .practice-name-row { display: flex; align-items: center; gap: 6px; }
 .practice-name-row label { font-weight: 800; }
-.practice-name-row input { width: min(450px, 45vw); min-height: 32px; padding: 0 7px; border: 0; border-bottom: 4px solid var(--red); color: var(--ink); background: transparent; font-weight: 700; }
+.practice-name-row input { width: min(450px, 45vw); min-height: 32px; padding: 0 7px; border: 0; border-bottom: 2px solid var(--red); color: var(--ink); background: transparent; font-weight: 700; }
 .practice-name-row input:not([readonly]) { background: white; outline: 1px solid #8c8073; outline-offset: -1px; }
 .edit-practice-name-button { width: 30px; min-height: 30px !important; }
 .edit-practice-name-button svg { width: 17px; height: 17px; fill: #766d62; }
